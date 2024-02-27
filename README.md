@@ -6,6 +6,8 @@ A simple header-only library to read/write, serialize/deserialize STL (stereolit
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
 # Usage
+Simply add [stl.h](modules/core/include/openstl/core/stl.h) to your codebase.
+
 ```c++
 std::ifstream file(filename, std::ios::binary);
 if (!file.is_open()) {
@@ -44,9 +46,6 @@ std::stringstream ss;
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
 openstl::serializeStl(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 ```
-
-# Usage
-Simply add [stl.h](modules/core/include/openstl/core/stl.h) to your codebase.
 
 # Test
 ```bash
