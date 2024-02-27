@@ -8,6 +8,7 @@ A simple header-only library to read/write, serialize/deserialize STL (stereolit
 # Usage
 Simply add [stl.h](modules/core/include/openstl/core/stl.h) to your codebase.
 
+## Read STL from file
 ```c++
 std::ifstream file(filename, std::ios::binary);
 if (!file.is_open()) {
@@ -20,6 +21,7 @@ std::vector<openstl::Triangle> triangles = openstl::deserializeStl(file);
 file.close()
 ```
 
+## Write STL to a file
 ```c++
 std::ofstream file(filename, std::ios::binary);
 if (!file.is_open()) {
@@ -27,7 +29,6 @@ if (!file.is_open()) {
     return 1;
 }
 
-// Serialize the triangles in binary format
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
 openstl::serializeStl(originalTriangles, stream, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 
@@ -39,10 +40,10 @@ if (stream.fail()) {
 stream.close();
 ```
 
+## Serialize STL to a stream
 ```c++
 std::stringstream ss;
 
-// Serialize the triangles in binary format
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
 openstl::serializeStl(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 ```
