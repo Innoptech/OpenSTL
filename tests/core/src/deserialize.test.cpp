@@ -72,6 +72,8 @@ TEST_CASE("Deserialize Binary STL", "[openstl]") {
         REQUIRE(file.is_open());
         auto triangles = deserializeBinaryStl(file);
         REQUIRE(triangles.size() == 12);
+        REQUIRE(triangles.at(0).normal.x == -1);
+        REQUIRE(triangles.at(1).normal.z == -1);
 
         file.clear(); file.seekg(0);
         auto triangles_auto = deserializeStl(file);
