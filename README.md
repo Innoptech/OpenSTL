@@ -5,9 +5,24 @@ A simple header-only library to read/write, serialize/deserialize STL (stereolit
 [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
-# Usage
+# Integrate to your codebase
+## Method 1
 Simply add [stl.h](modules/core/include/openstl/core/stl.h) to your codebase.
 
+## Method 2
+Include this repository with CMAKE Fetchcontent and link your executable/library to openstl::core library.
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+openstl
+GIT_REPOSITORY https://github.com/Innoptech/OpenSTL.git
+GIT_TAG main
+GIT_SHALLOW TRUE
+GIT_PROGRESS TRUE)
+FetchContent_MakeAvailable(openstl)
+```
+
+# Usage
 ## Read STL from file
 ```c++
 std::ifstream file(filename, std::ios::binary);
