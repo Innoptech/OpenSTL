@@ -23,7 +23,7 @@ file.close()
 ```c++
 std::ofstream file(filename, std::ios::binary);
 if (!file.is_open()) {
-    std::cerr << "Error: Unable to open file " << filename << std::endl;
+    std::cerr << "Error: Unable to open file '" << filename << "'" << std::endl;
     return 1;
 }
 
