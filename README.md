@@ -1,6 +1,10 @@
 # OpenSTL
 A simple header-only library to read/write, serialize/deserialize STL (stereolithography) files and data.
 
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
+[![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
+
 # Usage
 ```c++
 std::ifstream file(filename, std::ios::binary);
@@ -9,7 +13,7 @@ if (!file.is_open()) {
     return 1;
 }
 
-// Deserialize the triangles from both binary or ASCII format
+// Deserialize the triangles in either binary or ASCII format
 std::vector<Triangle> triangles = openstl::deserializeStl(file);
 file.close()
 ```
