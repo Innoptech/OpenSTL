@@ -1,0 +1,32 @@
+*build*/
+
+# C extensions
+*.so
+*.a
+
+# Images and large files
+*.stl
+
+# Compiled Python bytecode
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+
+# IDE cache
+.vscode/
+.eggs/
+.idea/
+
+# Cache files
+__pycache__
+.pytest_cache/
+mypy_cache/
+
+#Ignore files generated at runtime
+.env
+build
+generated
+
+# Exclusions
+!tests/*
