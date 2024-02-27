@@ -14,7 +14,7 @@ if (!file.is_open()) {
 }
 
 // Deserialize the triangles in either binary or ASCII format
-std::vector<Triangle> triangles = openstl::deserializeStl(file);
+std::vector<openstl::Triangle> triangles = openstl::deserializeStl(file);
 file.close()
 ```
 
