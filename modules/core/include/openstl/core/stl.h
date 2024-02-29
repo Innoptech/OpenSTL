@@ -75,12 +75,12 @@ namespace openstl
 
         // Write triangle count (4 bytes)
         uint32_t triangleCount = static_cast<uint32_t>(triangles.size());
-        stream.write(reinterpret_cast<const char*>(&triangleCount), sizeof(triangleCount));
+        stream.write((const char*)&triangleCount, sizeof(triangleCount));
 
         // Write triangles
         uint16_t attribute_byte_count{0};
         for (const auto& triangle : triangles) {
-            stream.write(reinterpret_cast<const char*>(&triangle), sizeof(Triangle));
+            stream.write((const char*)&triangle, sizeof(Triangle));
             stream.write((const char*)&attribute_byte_count, sizeof(uint16_t));
         }
     }
@@ -145,15 +145,15 @@ namespace openstl
         // Read header
         stream.ignore(80); // Ignore the header
         uint32_t triangle_qty;
-        stream.read(reinterpret_cast<char*>(&triangle_qty), sizeof(triangle_qty));
+        stream.read((char*)&triangle_qty, sizeof(triangle_qty));
 
         // Read triangles
         for (uint32_t i = 0; i < triangle_qty; ++i) {
             Triangle triangle{};
-            stream.read(reinterpret_cast<char*>(&triangle.normal), sizeof(triangle.normal));
-            stream.read(reinterpret_cast<char*>(&triangle.v0), sizeof(triangle.v0));
-            stream.read(reinterpret_cast<char*>(&triangle.v1), sizeof(triangle.v1));
-            stream.read(reinterpret_cast<char*>(&triangle.v2), sizeof(triangle.v2));
+            stream.read((char*)&triangle.normal, sizeof(triangle.normal));
+            stream.read((char*)&triangle.v0, sizeof(triangle.v0));
+            stream.read((char*)&triangle.v1, sizeof(triangle.v1));
+            stream.read((char*)&triangle.v2, sizeof(triangle.v2));
             stream.ignore(sizeof(uint16_t));
             triangles.push_back(triangle);
         }
