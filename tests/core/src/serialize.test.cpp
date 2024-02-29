@@ -10,13 +10,14 @@ bool operator!=(const Vec3& rhs, const Vec3& lhs) {
 }
 
 // Utility function to compare two vectors of triangles
-bool compareTriangles(const std::vector<Triangle>& a, const std::vector<Triangle>& b) {
+bool compareTriangles(const std::vector<Triangle>& a, const std::vector<Triangle>& b, bool omit_attribute=false) {
     if (a.size() != b.size()) return false;
     for (size_t i = 0; i < a.size(); ++i) {
         if (a[i].normal != b[i].normal ||
             a[i].v0 != b[i].v0 ||
             a[i].v1 != b[i].v1 ||
-            a[i].v2 != b[i].v2) {
+            a[i].v2 != b[i].v2 ||
+            ((a[i].attribute_byte_count != b[i].attribute_byte_count) & !omit_attribute)) {
             return false;
         }
     }
@@ -26,8 +27,8 @@ bool compareTriangles(const std::vector<Triangle>& a, const std::vector<Triangle
 TEST_CASE("Serialize STL triangles", "[openstl]") {
     // Generate some sample triangles
     std::vector<Triangle> originalTriangles{
-            {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}},
-            {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 1.0f}}
+            {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, 1u},
+            {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 1.0f}, 2u}
     };
 
     SECTION("Binary Format") {
@@ -87,6 +88,6 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         auto deserializedTriangles = deserializeAsciiStl(inFile);
 
         // Validate deserialized triangles against original triangles
-        REQUIRE(compareTriangles(deserializedTriangles, originalTriangles));
+        REQUIRE(compareTriangles(deserializedTriangles, originalTriangles, true));
     }
 }

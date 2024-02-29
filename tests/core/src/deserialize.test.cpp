@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include "openstl/tests/testutils.h"
 #include "openstl/core/stl.h"
 #include <iostream>
@@ -26,6 +27,18 @@ TEST_CASE("Deserialize ASCII STL", "[openstl]") {
         REQUIRE(triangles[0].normal.x == 0.1f);
         REQUIRE(triangles[0].normal.y == 0.2f);
         REQUIRE(triangles[0].normal.z == 1.0f);
+
+        REQUIRE(triangles[0].v0.x == 0.0f);
+        REQUIRE(triangles[0].v0.y == 0.0f);
+        REQUIRE(triangles[0].v0.z == 0.0f);
+
+        REQUIRE(triangles[0].v1.x == 1.0f);
+        REQUIRE(triangles[0].v1.y == 0.0f);
+        REQUIRE(triangles[0].v1.z == 0.0f);
+
+        REQUIRE(triangles[0].v2.x == 0.0f);
+        REQUIRE(triangles[0].v2.y == 1.0f);
+        REQUIRE(triangles[0].v2.z == 0.0f);
 
         stream.clear(); stream.seekg(0);
         auto triangles_auto = deserializeStl(stream);
@@ -72,8 +85,9 @@ TEST_CASE("Deserialize Binary STL", "[openstl]") {
         REQUIRE(file.is_open());
         auto triangles = deserializeBinaryStl(file);
         REQUIRE(triangles.size() == 12);
-        REQUIRE(triangles.at(0).normal.x == -1);
-        REQUIRE(triangles.at(1).normal.z == -1);
+        REQUIRE_THAT(triangles.at(0).normal.x, Catch::Matchers::WithinAbs(-1.0, 1e-6));
+        REQUIRE_THAT(triangles.at(1).normal.z, Catch::Matchers::WithinAbs(-1.0, 1e-6));
+        REQUIRE(triangles.at(0).attribute_byte_count == 0);
 
         file.clear(); file.seekg(0);
         auto triangles_auto = deserializeStl(file);

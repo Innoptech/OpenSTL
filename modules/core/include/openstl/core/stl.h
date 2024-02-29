@@ -39,13 +39,17 @@ SOFTWARE.
 
 namespace openstl
 {
+// Disable padding for the structure
+#pragma pack(push, 1)
     struct Vec3 {
         float x, y, z;
     };
 
     struct Triangle {
         Vec3 normal, v0, v1, v2;
+        uint16_t attribute_byte_count;
     };
+#pragma pack(pop)
 
     //---------------------------------------------------------------------------------------------------------
     // Serialize
@@ -78,10 +82,8 @@ namespace openstl
         stream.write((const char*)&triangleCount, sizeof(triangleCount));
 
         // Write triangles
-        uint16_t attribute_byte_count{0};
         for (const auto& triangle : triangles) {
             stream.write((const char*)&triangle, sizeof(Triangle));
-            stream.write((const char*)&attribute_byte_count, sizeof(uint16_t));
         }
     }
 
@@ -140,24 +142,16 @@ namespace openstl
     template <typename Stream>
     inline std::vector<Triangle> deserializeBinaryStl(Stream& stream)
     {
-        std::vector<Triangle> triangles;
-
         // Read header
         stream.ignore(80); // Ignore the header
         uint32_t triangle_qty;
         stream.read((char*)&triangle_qty, sizeof(triangle_qty));
 
         // Read triangles
+        std::vector<Triangle> triangles(triangle_qty);
         for (uint32_t i = 0; i < triangle_qty; ++i) {
-            Triangle triangle{};
-            stream.read((char*)&triangle.normal, sizeof(triangle.normal));
-            stream.read((char*)&triangle.v0, sizeof(triangle.v0));
-            stream.read((char*)&triangle.v1, sizeof(triangle.v1));
-            stream.read((char*)&triangle.v2, sizeof(triangle.v2));
-            stream.ignore(sizeof(uint16_t));
-            triangles.push_back(triangle);
+            stream.read((char*)&triangles[i], sizeof(Triangle));
         }
-
         return triangles;
     }
 
