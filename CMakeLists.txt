@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10.2)
 # Project Definitions
 #-------------------------------------------------------------------------------
 project(OPENSTL
-        DESCRIPTION "A simple STL reader and writer"
+        DESCRIPTION "A simple STL de/serializer"
         LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
