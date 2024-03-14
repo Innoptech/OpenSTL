@@ -1,5 +1,6 @@
 import os, re, sys
 import subprocess
+import sysconfig
 from pathlib import Path
 
 from setuptools import Extension, setup
@@ -27,9 +28,10 @@ def read_version_from_pyproject(file_path):
 # The name must be the _single_ output extension from the CMake build.
 # If you need multiple extensions, see scikit-build.
 class CMakeExtension(Extension):
-    def __init__(self, name: str, sourcedir: str = "") -> None:
+    def __init__(self, name: str, sourcedir: str = "", cmake: str = "cmake") -> None:
         super().__init__(name, sources=[])
         self.sourcedir = os.fspath(Path(sourcedir).resolve())
+        self.cmake = cmake
 
 
 class CMakeBuild(build_ext):
@@ -48,7 +50,7 @@ class CMakeBuild(build_ext):
 
         # CMake lets you override the generator - we need to check this.
         # Can be set with Conda-Build, for example.
-        cmake_generator = os.environ.get("CMAKE_GENERATOR", "Ninja")
+        cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
@@ -56,6 +58,8 @@ class CMakeBuild(build_ext):
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DPYTHON_INCLUDE_DIR={sysconfig.get_path('include')}",
+            f"-DPYTHON_LIBRARY={sysconfig.get_config_var('LIBDIR')}",
             f"-DCMAKE_BUILD_TYPE={cfg}",
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
             '-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON',
@@ -67,17 +71,6 @@ class CMakeBuild(build_ext):
         # (needed e.g. to build for ARM OSx on conda-forge)
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
-
-        try:
-            import ninja  # noqa: F401
-
-            ninja_executable_path = Path(ninja.BIN_DIR) / "ninja"
-            cmake_args += [
-                "-GNinja",
-                f"-DCMAKE_MAKE_PROGRAM:FILEPATH={ninja_executable_path}",
-            ]
-        except ImportError:
-            pass
 
 
         # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
@@ -94,12 +87,17 @@ class CMakeBuild(build_ext):
             build_temp.mkdir(parents=True)
 
         subprocess.run(
-            ["cmake", ext.sourcedir] + cmake_args, cwd=build_temp, check=True
+            [ext.cmake, ext.sourcedir] + cmake_args, cwd=build_temp, check=True
         )
         subprocess.run(
-            ["cmake", "--build", "."] + build_args, cwd=build_temp, check=True
+            [ext.cmake, "--build", "."] + build_args, cwd=build_temp, check=True
         )
 
+test_deps = [
+    'coverage',
+    'pytest',
+    'numpy'
+]
 
 setup(
     name                    ="openstl",
@@ -111,10 +109,13 @@ setup(
     author                  ='Jean-Christophe Ruel',
     author_email            ='info@innoptech.com',
     python_requires         =">=3.4",
-    extras_require          ={"test": ["pytest>=6.0"]},
-    ext_modules             =[CMakeExtension("openstl", sourcedir=os.environ.get('OPENSL_SOURCE_DIR', '.'))],
+    ext_modules             =[CMakeExtension("openstl",
+                                             sourcedir=os.environ.get('OPENSTL_SOURCE_DIR', '.'),
+                                             cmake=os.environ.get('OPENSTL_CMAKE_PATH', 'cmake'))],
     cmdclass                ={'build_ext': CMakeBuild},
     test_suite              ="tests/python",
+    tests_require           =test_deps,
+    extras_require          ={'test': test_deps},
     include_package_data    =False,
     zip_safe                =False,
     package_data            ={"openstl": ["*"]}

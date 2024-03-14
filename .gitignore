@@ -12,6 +12,7 @@
 *.py[cod]
 *$py.class
 *.egg-info/
+*.whl
 dist/
 
 # IDE cache

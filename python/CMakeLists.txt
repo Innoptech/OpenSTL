@@ -34,5 +34,6 @@ IF(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
     target_compile_definitions(openstl PRIVATE VERSION_INFO=${PROJECT_VERSION})
     set_target_properties(openstl PROPERTIES
             INTERPROCEDURAL_OPTIMIZATION ON
+            CXX_VISIBILITY_PRESET hidden
             VISIBILITY_INLINES_HIDDEN ON)
 ENDIF()
