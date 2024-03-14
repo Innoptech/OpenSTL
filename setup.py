@@ -117,6 +117,16 @@ setup(
     tests_require           =test_deps,
     extras_require          ={'test': test_deps},
     include_package_data    =False,
-    zip_safe                =False,
-    package_data            ={"openstl": ["*"]}
+    zip_safe                =True,
+    classifiers=[
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Topic :: Multimedia :: Graphics :: 3D Modeling",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Visualization",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+    ],
 )
