@@ -6,13 +6,13 @@ function repair_wheel {
     if ! auditwheel show "$wheel"; then
         echo "Skipping non-platform wheel $wheel"
     else
-        auditwheel repair "$wheel" --plat "$PLAT" -w /io/wheelhouse/
+        auditwheel repair "$wheel" --plat "$PLAT" -w ./wheelhouse/
     fi
 }
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    OPENSTL_SOURCE_DIR=$PWD "${PYBIN}/pip" wheel /io/ --no-deps -w wheelhouse/
+    OPENSTL_SOURCE_DIR=$PWD "${PYBIN}/pip" wheel . --no-deps -w wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels
@@ -24,6 +24,6 @@ done
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install pytest numpy
-    "${PYBIN}/pip" install openstl --no-index -f /io/wheelhouse
-    (cd "$HOME"; "${PYBIN}/pytest" /io/tests/python)
+    "${PYBIN}/pip" install openstl --no-index -f ./wheelhouse
+    (cd "$HOME"; "${PYBIN}/pytest" ./tests/python)
 done
