@@ -103,7 +103,6 @@ void stl(py::module_ &m) {
             .def_readwrite("v1", &Triangle::normal)
             .def_readwrite("v2", &Triangle::normal)
             .def_readwrite("attribute_byte_count", &Triangle::attribute_byte_count)
-            .def("vertices", [](const Triangle &obj){return std::vector<Vec3>{obj.v0, obj.v1, obj.v2};})
             .def_buffer([](Triangle &m) -> py::buffer_info {
                 return py::buffer_info(
                         &m.normal,
