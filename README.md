@@ -6,7 +6,8 @@ A simple yet fast header-only library to read/write, serialize/deserialize STL (
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
 # Performances benchmark
-The benchmark results demonstrate that OpenSTL exhibits performance close to native NumPy speed.
+The benchmark results indicate that the performance of multiplying OpenSTL triangles is comparable to that of 
+native NumPy array multiplication.
 ![Benchmark Results](benchmark/benchmark.png)
 
 # Python Usage
