@@ -5,7 +5,84 @@ A simple header-only library to read/write, serialize/deserialize STL (stereolit
 [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
-# Usage
+# Python Usage
+### Read and write from a STL file
+```python
+import openstl
+
+# Define a list of triangles
+# Following the STL standard, each triangle is defined with : normal, v0, v1, v2, attribute_byte_count
+# Note: attribute_byte_count can be used for coloring
+triangles = [
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
+]
+
+# Serialize the triangles to a file
+openstl.write("output.stl", triangles, openstl.StlFormat.Binary)
+
+# Deserialize triangles from a file
+deserialized_triangles = openstl.read("output.stl")
+
+# Print the deserialized triangles
+print("Deserialized Triangles:", deserialized_triangles)
+```
+
+Notes:
+- The format `openstl.StlFormat.ASCII` can be used to make the file human-readable. 
+It is however slower than Binary for reading and writing.
+- `attribute_byte_count` can only be written in **Binary** format. 
+The STL standard do not include it in the ASCII format.
+
+### Construct a Triangle
+```python
+import openstl
+
+# Following the STL standard, each triangle is defined with : normal, v0, v1, v2, attribute_byte_count
+triangle = openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
+
+# Access individual vertices
+print("Normal:", triangle.normal)
+print("Vertex 0:", triangle.v0)
+print("Vertex 1:", triangle.v1)
+print("Vertex 2:", triangle.v2)
+
+# Access normal and attribute_byte_count
+print("Attribute Byte Count:", triangle.attribute_byte_count)
+
+# Get length of Triangle (number of elements in buffer)
+print("Length:", len(triangle))
+
+# Get elements using indexing (inefficient, instead see )
+print("Elements:", [triangle[i] for i in range(len(triangle))])
+
+# Print Triangle object
+print("Triangle:", triangle)
+```
+
+### Get a, efficient view of the vertices
+```python
+import openstl
+
+# Define a list of triangles
+triangles = [
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
+    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
+]
+
+# Get a view of the vertices (v0, v1, v2) of all triangles by skipping normals and attribute_byte_count
+vertices = openstl.get_vertices(triangles)
+
+# Print the shape of the array
+print("Shape of vertices array:", vertices.shape)
+
+# Print the vertices array
+print("Vertices:", vertices)
+```
+
+# C++ Usage
 ### Read STL from file
 ```c++
 std::ifstream file(filename, std::ios::binary);
