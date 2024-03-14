@@ -11,12 +11,11 @@ A simple header-only library to read/write, serialize/deserialize STL (stereolit
 std::ifstream file(filename, std::ios::binary);
 if (!file.is_open()) {
     std::cerr << "Error: Unable to open file '" << filename << "'" << std::endl;
-    return 1;
 }
 
 // Deserialize the triangles in either binary or ASCII format
 std::vector<openstl::Triangle> triangles = openstl::deserializeStl(file);
-file.close()
+file.close();
 ```
 
 ### Write STL to a file
@@ -24,18 +23,17 @@ file.close()
 std::ofstream file(filename, std::ios::binary);
 if (!file.is_open()) {
     std::cerr << "Error: Unable to open file '" << filename << "'" << std::endl;
-    return 1;
 }
 
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
-openstl::serializeStl(originalTriangles, stream, openstl::StlFormat::Binary); // Or StlFormat::ASCII
+openstl::serializeStl(originalTriangles, file, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 
-if (stream.fail()) {
+if (file.fail()) {
     std::cerr << "Error: Failed to write to file " << filename << std::endl;
 } else {
     std::cout << "File " << filename << " has been successfully written." << std::endl;
 }
-stream.close();
+file.close();
 ```
 
 ### Serialize STL to a stream

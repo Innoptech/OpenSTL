@@ -1,20 +1,21 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.15.0)
 
 
 #-------------------------------------------------------------------------------
 # Project Definitions
 #-------------------------------------------------------------------------------
 project(OPENSTL
-        DESCRIPTION "A simple STL reader and writer"
+        DESCRIPTION "A simple STL serializer and deserializer"
         LANGUAGES CXX)
 
 #-------------------------------------------------------------------------------
 # VERSIONING
 #-------------------------------------------------------------------------------
 add_subdirectory(cmake)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake") # Enable FindFoo.cmake
-configure_file("${PROJECT_SOURCE_DIR}/pyproject.toml" "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml")
-ReadVersion("${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(PYPROJECT_PATH "${CMAKE_CURRENT_BINARY_DIR}/pyproject.toml")
+configure_file("${PROJECT_SOURCE_DIR}/pyproject.toml" ${PYPROJECT_PATH})
+ReadVersion(${PYPROJECT_PATH})
 
 #-------------------------------------------------------------------------------
 # COMPILATION
@@ -23,9 +24,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wall -Wextra -std=c++11 -lstdc++ -pthread")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fno-math-errno")
 set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lm ")
 
 # Do not allow to build in main repo
 file(TO_CMAKE_PATH "${PROJECT_BINARY_DIR}/CMakeLists.txt" LOC_PATH)
@@ -49,6 +51,7 @@ endif()
 # CMAKE OPTIONS
 #-------------------------------------------------------------------------------
 option(OPENSTL_BUILD_TESTS "Enable the compilation of the test files." OFF)
+option(OPENSTL_BUILD_PYTHON "Enable the compilation of the python binding." OFF)
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
     add_definitions(-DDEBUG)
@@ -71,6 +74,7 @@ endforeach()
 # Tests
 #-------------------------------------------------------------------------------
 if(OPENSTL_BUILD_TESTS)
+    ReadDependencyVersion(catch2 ${PYPROJECT_PATH})
     add_subdirectory(extern/catch2)
     # Configure automatic test registration
     list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
@@ -79,4 +83,12 @@ if(OPENSTL_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
+#-------------------------------------------------------------------------------
+# Python
+#-------------------------------------------------------------------------------
+if(OPENSTL_BUILD_PYTHON)
+    ReadDependencyVersion(pybind11 ${PYPROJECT_PATH})
+    add_subdirectory(extern/pybind11)
+    add_subdirectory(python)
+endif()
 
