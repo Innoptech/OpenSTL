@@ -5,8 +5,8 @@ import openstl
 
 @pytest.fixture
 def sample_triangles():
-    triangle1 = openstl.Triangle(openstl.Vec3(0, 0, 1), openstl.Vec3(1, 1, 1), openstl.Vec3(2, 2, 2), openstl.Vec3(3, 3, 3), 3)
-    triangle2 = openstl.Triangle(openstl.Vec3(0, 0, 1), openstl.Vec3(4, 4, 4), openstl.Vec3(5, 5, 5), openstl.Vec3(6 ,6, 6), 5)
+    triangle1 = openstl.Triangle([0, 0, 1], [1, 1, 1], [2, 2, 2], [3, 3, 3], 3)
+    triangle2 = openstl.Triangle([0, 0, 1], [4, 4, 4], [5, 5, 5], [6 ,6, 6], 5)
     return [triangle1, triangle2]
 
 def test_get_vertices_empty():
