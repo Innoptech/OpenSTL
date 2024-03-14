@@ -1,11 +1,18 @@
 # OpenSTL
-A simple header-only library to read/write, serialize/deserialize STL (stereolithography) files and data.
+A simple yet fast header-only library to read/write, serialize/deserialize STL (stereolithography) files and data for C++ and Python.
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
 
+# Performances benchmark
+The benchmark results demonstrate that OpenSTL exhibits performance close to native NumPy speed.
+![Benchmark Results](benchmark/benchmark.png)
+
 # Python Usage
+### Install
+`pip install openstl`
+
 ### Read and write from a STL file
 ```python
 import openstl
@@ -35,7 +42,7 @@ It is however slower than Binary for reading and writing.
 - `attribute_byte_count` can only be written in **Binary** format. 
 The STL standard do not include it in the ASCII format.
 
-### Construct a Triangle
+### Access the Triangle attributes
 ```python
 import openstl
 
@@ -54,14 +61,14 @@ print("Attribute Byte Count:", triangle.attribute_byte_count)
 # Get length of Triangle (number of elements in buffer)
 print("Length:", len(triangle))
 
-# Get elements using indexing (inefficient, instead see )
+# Get elements using indexing (inefficient, instead use get_vertices)
 print("Elements:", [triangle[i] for i in range(len(triangle))])
 
 # Print Triangle object
 print("Triangle:", triangle)
 ```
 
-### Get a, efficient view of the vertices
+### Get an efficient view of the vertices
 ```python
 import openstl
 
