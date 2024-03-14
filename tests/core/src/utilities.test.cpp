@@ -8,9 +8,9 @@ TEST_CASE("Find unique triangles", "[openstl]") {
     Vec3 v0{1.0f, 2.0f, 3.0f}, v1{4.0f, 5.0f, 6.0f}, v2{7.0f, 8.0f, 9.0f}, v3{10.0f, 20.0f, 30.0f};
     Vec3 normal{0.f, 0.f, 1.f};
     std::vector<Triangle> triangles = {
-            {normal, v0, v1, v2},
-            {normal, v0, v1, v2},  // Duplicate vertices
-            {normal, v3, v3, v3},
+            {normal, v0, v1, v2, 0},
+            {normal, v0, v1, v2, 0},  // Duplicate vertices
+            {normal, v3, v3, v3, 0},
     };
 
     auto uniqueVertices = findUniqueVertices(triangles);
