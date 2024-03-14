@@ -42,6 +42,8 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
   tests:
     name: Test openstl testpypi distrib
+    needs:
+      - publish-to-testpypi
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,7 +59,6 @@ jobs:
           python3 -m pip install --index-url https://test.pypi.org/simple/ openstl
           python3 -m pip install numpy pytest
           pytest ./tests/python
-
   publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
     needs:
