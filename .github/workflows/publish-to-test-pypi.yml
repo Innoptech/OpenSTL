@@ -20,27 +20,6 @@ jobs:
         name: python-package-distributions
         path: wheelhouse/
 
-  publish-to-pypi:
-    name: >-
-      Publish Python 🐍 distribution 📦 to PyPI
-    needs:
-    - build
-    runs-on: self-hosted
-    environment:
-      name: pypi
-      url: https://pypi.org/p/openstl 
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: python-package-distributions
-        path: wheelhouse/
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-
   github-release:
     name: >-
       Sign the Python 🐍 distribution 📦 with Sigstore
@@ -107,3 +86,36 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         repository-url: https://test.pypi.org/legacy/
+
+
+  tests:  #after_publish_on_testpypi
+    name: Test openstl testpypi distrib
+    needs:
+    - publish-to-testpypi
+    runs-on: self-hosted
+    - name: Build a binary wheel and a source tarball -> manylinux_2_28_x86_64
+      run: >
+        python3 -m pip install --index-url https://test.pypi.org/simple/ openstl
+        python3 -m pip install numpy pytest
+        pytest" ./tests/python
+
+  publish-to-pypi:
+    name: >-
+      Publish Python 🐍 distribution 📦 to PyPI
+    needs:
+    - tests
+    runs-on: self-hosted
+    environment:
+      name: pypi
+      url: https://pypi.org/p/openstl 
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: python-package-distributions
+        path: wheelhouse/
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1

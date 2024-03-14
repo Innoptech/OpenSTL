@@ -20,10 +20,3 @@ for whl in wheelhouse/*.whl; do
     repair_wheel "$whl"
     rm $whl
 done
-
-# Install packages and test
-for PYBIN in /opt/python/*/bin/; do
-    "${PYBIN}/pip" install pytest numpy
-    "${PYBIN}/pip" install openstl --no-index -f ./wheelhouse
-    (cd "$HOME"; "${PYBIN}/pytest" ./tests/python)
-done
