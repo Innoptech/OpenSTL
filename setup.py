@@ -22,9 +22,6 @@ def read_version_from_pyproject(file_path):
     else:
         return None
 
-def read_readme(file_path):
-    with open(file_path, 'r') as file:
-        return file.read()
 
 # A CMakeExtension needs a sourcedir instead of a file list.
 # The name must be the _single_ output extension from the CMake build.
@@ -108,7 +105,8 @@ setup(
     name                    ="openstl",
     version                 =read_version_from_pyproject("pyproject.toml"),
     description             ="A simple STL serializer and deserializer",
-    long_description        =read_readme("README.md"),
+    long_description        =open('README.md').read(),
+    long_description_content_type='text/markdown',
     url                     ='https://github.com/Innoptech/OpenSTL',
     author                  ='Jean-Christophe Ruel',
     author_email            ='info@innoptech.com',
