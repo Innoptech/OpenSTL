@@ -138,11 +138,12 @@ Choose weither you want to fetch a specific branch or tag using `GIT_TAG`. Use t
 ```cmake
 include(FetchContent)
 FetchContent_Declare(
-openstl
-GIT_REPOSITORY https://github.com/Innoptech/OpenSTL.git
-GIT_TAG main
-GIT_SHALLOW TRUE
-GIT_PROGRESS TRUE)
+    openstl
+    GIT_REPOSITORY https://github.com/Innoptech/OpenSTL.git
+    GIT_TAG main
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+)
 FetchContent_MakeAvailable(openstl)
 ```
 ### Naïve method
