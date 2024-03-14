@@ -13,7 +13,7 @@ function repair_wheel {
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
     OPENSTL_SOURCE_DIR=$PWD "${PYBIN}/pip" wheel . --no-deps -w dist/
-done
+done 
 
 # Bundle external shared libraries into the wheels
 for whl in dist/*.whl; do
