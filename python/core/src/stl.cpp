@@ -66,6 +66,7 @@ void stl(py::module_ &m) {
                 );
             })
             .def("__len__",  [](const Vec3 &obj) {
+                (void) obj;
                 return 3;
             })
             .def("__getitem__",  [](const Vec3 &obj, size_t index) {
@@ -115,6 +116,7 @@ void stl(py::module_ &m) {
                 );
             })
             .def("__len__",  [](const Triangle &obj) {
+                (void) obj;
                 return 12;
             })
             .def("__getitem__",  [](const Triangle &obj, size_t index) {
