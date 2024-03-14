@@ -56,6 +56,16 @@ namespace openstl
     //---------------------------------------------------------------------------------------------------------
     enum class StlFormat { ASCII, Binary };
 
+    /**
+     * @brief Serialize a vector of triangles to an ASCII STL format and write it to the provided stream.
+     *
+     * This function writes the vector of triangles to the stream in ASCII STL format, where each triangle
+     * is represented by its normal vector and three vertices.
+     *
+     * @tparam Stream The type of the output stream.
+     * @param triangles The vector of triangles to serialize.
+     * @param stream The output stream to write the serialized data to.
+     */
     template<typename Stream>
     void serializeAsciiStl(const std::vector<Triangle>& triangles, Stream& stream) {
         stream << "solid\n";
@@ -71,6 +81,13 @@ namespace openstl
         stream << "endsolid\n";
     }
 
+    /**
+     * @brief Serialize a vector of triangles in binary STL format and write to a stream.
+     *
+     * @tparam Stream The type of the output stream.
+     * @param triangles The vector of triangles to serialize.
+     * @param stream The output stream to write the serialized data.
+     */
     template<typename Stream>
     void serializeBinaryStl(const std::vector<Triangle>& triangles, Stream& stream) {
         // Write header (80 bytes for comments)
@@ -85,6 +102,14 @@ namespace openstl
         stream.write((const char*)triangles.data(), sizeof(Triangle)*triangles.size());
     }
 
+    /**
+     * @brief Serialize a vector of triangles in the specified STL format and write to a stream.
+     *
+     * @tparam Stream The type of the output stream.
+     * @param triangles The vector of triangles to serialize.
+     * @param stream The output stream to write the serialized data.
+     * @param format The format of the STL file (ASCII or binary).
+     */
     template <typename Stream>
     inline void serializeStl(const std::vector<Triangle>& triangles, Stream& stream, StlFormat format) {
         switch (format) {
@@ -100,6 +125,14 @@ namespace openstl
     //---------------------------------------------------------------------------------------------------------
     // Deserialize
     //---------------------------------------------------------------------------------------------------------
+
+    /**
+     * @brief Read a vertex from a stream.
+     *
+     * @tparam Stream The type of the input stream.
+     * @param stream The input stream from which to read the vertex.
+     * @param vertex The Vec3 object to store the read vertex.
+     */
     template <typename Stream>
     inline void readVertex(Stream& stream, Vec3& vertex)
     {
@@ -112,6 +145,13 @@ namespace openstl
         }
     }
 
+    /**
+     * @brief Deserialize an ASCII STL file from a stream and convert it to a vector of triangles.
+     *
+     * @tparam Stream The type of the input stream.
+     * @param stream The input stream from which to read the ASCII STL data.
+     * @return A vector of triangles representing the geometry from the ASCII STL file.
+     */
     template <typename Stream>
     inline std::vector<Triangle> deserializeAsciiStl(Stream& stream)
     {
@@ -137,6 +177,13 @@ namespace openstl
         return triangles;
     }
 
+    /**
+     * @brief Deserialize a binary STL file from a stream and convert it to a vector of triangles.
+     *
+     * @tparam Stream The type of the input stream.
+     * @param stream The input stream from which to read the binary STL data.
+     * @return A vector of triangles representing the geometry from the binary STL file.
+     */
     template <typename Stream>
     inline std::vector<Triangle> deserializeBinaryStl(Stream& stream)
     {
@@ -151,6 +198,13 @@ namespace openstl
         return triangles;
     }
 
+    /**
+     * @brief Check if the given stream contains ASCII STL data.
+     *
+     * @tparam Stream The type of the input stream.
+     * @param stream The input stream to check for ASCII STL data.
+     * @return True if the stream contains ASCII STL data, false otherwise.
+     */
     template <typename Stream>
     inline bool isAscii(Stream& stream)
     {
@@ -164,6 +218,16 @@ namespace openstl
         return condition;
     }
 
+    /**
+     * @brief Deserialize an STL file from a stream and convert it to a vector of triangles.
+     *
+     * This function detects the format of the STL file (ASCII or binary) by examining the content
+     * of the input stream and calls the appropriate deserialization function accordingly.
+     *
+     * @tparam Stream The type of the input stream.
+     * @param stream The input stream from which to read the STL data.
+     * @return A vector of triangles representing the geometry from the STL file.
+     */
     template <typename Stream>
     inline std::vector<Triangle> deserializeStl(Stream& stream)
     {
@@ -176,12 +240,10 @@ namespace openstl
     //---------------------------------------------------------------------------------------------------------
     // Transformation Utils
     //---------------------------------------------------------------------------------------------------------
-    // Custom equality operator for Vertex struct
     inline bool operator==(const Vec3& rhs, const Vec3& lhs) {
         return std::tie(rhs.x, rhs.y, rhs.z) == std::tie(lhs.x, lhs.y, lhs.z);
     }
 
-    // Custom hash function object for Vertex struct
     struct Vec3Hash {
         std::size_t operator()(const Vec3& vertex) const {
             // Combine hashes of x, y, and z using bitwise XOR
@@ -189,11 +251,15 @@ namespace openstl
         }
     };
 
-    // Function to find unique vertices in a vector of triangles
+    /**
+     * @brief Finds unique vertices from a vector of triangles.
+     *
+     * @param triangles The vector of triangles from which to find unique vertices.
+     * @return An unordered_set containing unique Vec3 vertices.
+     */
     inline std::unordered_set<Vec3, Vec3Hash> findUniqueVertices(const std::vector<Triangle>& triangles) {
         std::unordered_set<Vec3, Vec3Hash> uniqueVertices;
 
-        // Iterate over each triangle and insert its vertices into the set
         for (const auto& triangle : triangles) {
             uniqueVertices.insert({triangle.v0.x, triangle.v0.y, triangle.v0.z});
             uniqueVertices.insert({triangle.v1.x, triangle.v1.y, triangle.v1.z});
