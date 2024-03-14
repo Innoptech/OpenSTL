@@ -1,16 +1,6 @@
-[project]
-authors = [
-    {name = "Jean-Christophe Ruel", email = "info@innoptech.com"},
-]
-description = "A simple STL serializer and deserializer"
-readme = "README.md"
-license = {file = "LICENSE"}
-keywords = ["stl", "video games", "rendering"]
-
-[project.urls]
-Homepage = ""
-Repository = "https://github.com/Innoptech/OpenSTL"
-Website = "https://www.innoptech.com/"
+[build-system]
+requires = ["setuptools>=42", "wheel" , "cmake"]
+build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

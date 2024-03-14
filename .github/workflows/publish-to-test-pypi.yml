@@ -15,12 +15,9 @@ jobs:
         python-version: "3.x"
     - name: Install pypa/build
       run: >-
-        python3 -m
-        pip install
-        build
-        --user
+        apt-get install -y g++
     - name: Build a binary wheel and a source tarball
-      run: python3 -m build
+      run: python3 setup.py bdist_wheel
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:

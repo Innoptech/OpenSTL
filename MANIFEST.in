@@ -1,0 +1,3 @@
+manifest:
+  licenses:
+    package: ./LICENSE
