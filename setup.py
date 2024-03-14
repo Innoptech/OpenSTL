@@ -111,7 +111,7 @@ setup(
     author_email            ='info@innoptech.com',
     python_requires         =">=3.4",
     extras_require          ={"test": ["pytest>=6.0"]},
-    ext_modules             =[CMakeExtension("openstl")],
+    ext_modules             =[CMakeExtension("openstl", sourcedir=".")],
     cmdclass                ={'build_ext': CMakeBuild},
     test_suite              ="tests/python",
     include_package_data    =False,

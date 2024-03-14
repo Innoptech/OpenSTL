@@ -14,7 +14,9 @@ jobs:
       with:
         python-version: "3.x"
     - name: Build a binary wheel and a source tarball
-      run: python3 setup.py bdist_wheel
+      run: >-
+        python3 -m pip install --upgrade setuptools cmake
+        python3 setup.py bdist_wheel
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
       with:
