@@ -2,7 +2,7 @@
 set -e -u -x
 
 function repair_wheel {
-    wheel="$1"
+    wheel="$1" 
     if ! auditwheel show "$wheel"; then
         echo "Skipping non-platform wheel $wheel"
     else
