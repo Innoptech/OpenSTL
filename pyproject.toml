@@ -12,7 +12,7 @@ testpaths = [
 [tool]
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.1.4"
+version = "0.1.5"
 tag_format = "v$version"
 
 
