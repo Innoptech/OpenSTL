@@ -78,13 +78,11 @@ namespace openstl
         stream.write(header, 80);
 
         // Write triangle count (4 bytes)
-        uint32_t triangleCount = static_cast<uint32_t>(triangles.size());
+        auto triangleCount = static_cast<uint32_t>(triangles.size());
         stream.write((const char*)&triangleCount, sizeof(triangleCount));
 
         // Write triangles
-        for (const auto& triangle : triangles) {
-            stream.write((const char*)&triangle, sizeof(Triangle));
-        }
+        stream.write((const char*)triangles.data(), sizeof(Triangle)*triangles.size());
     }
 
     template <typename Stream>
@@ -149,9 +147,7 @@ namespace openstl
 
         // Read triangles
         std::vector<Triangle> triangles(triangle_qty);
-        for (uint32_t i = 0; i < triangle_qty; ++i) {
-            stream.read((char*)&triangles[i], sizeof(Triangle));
-        }
+        stream.read((char*)triangles.data(), sizeof(Triangle)*triangle_qty);
         return triangles;
     }
 
