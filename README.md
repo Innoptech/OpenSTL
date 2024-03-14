@@ -11,7 +11,7 @@ The benchmark results demonstrate that OpenSTL exhibits performance close to nat
 
 # Python Usage
 ### Install
-`pip install openstl` or `pip install `
+`pip install openstl` or `pip install -U git+https://github.com/Innoptech/OpenSTL@main`
 
 ### Read and write from a STL file
 ```python
