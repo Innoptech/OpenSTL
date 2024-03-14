@@ -3,9 +3,10 @@ A simple yet fast header-only library to read/write, serialize/deserialize STL (
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](LICENSE)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
-[![PyPI version](https://badge.fury.io/py/openstl.svg)](https://badge.fury.io/py/openstl)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)  
+[![PyPI package](https://badge.fury.io/py/openstl.svg)](https://badge.fury.io/py/openstl)
 [![Publish OpenSTL](https://github.com/Innoptech/OpenSTL/actions/workflows/publish-to-test-pypi.yml/badge.svg)](https://github.com/Innoptech/OpenSTL/actions/workflows/publish-to-test-pypi.yml)
+[![Python Versions](https://img.shields.io/pypi/pyversions/openstl.svg)](https://pypi.org/project/openstl/)
 
 # Performances benchmark
 The benchmark results indicate that the performance of multiplying OpenSTL triangles is comparable to that of 
