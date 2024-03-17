@@ -45,9 +45,6 @@ class CMakeBuild(build_ext):
         for filename in os.listdir(ext.sourcedir):
             print(filename)
 
-        debug = int(os.environ.get("DEBUG", 0)) if self.debug is None else self.debug
-        cfg = "Debug" if debug else "Release"
-
         # CMake lets you override the generator - we need to check this.
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
@@ -60,7 +57,7 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DPYTHON_INCLUDE_DIR={sysconfig.get_path('include')}",
             f"-DPYTHON_LIBRARY={sysconfig.get_config_var('LIBDIR')}",
-            f"-DCMAKE_BUILD_TYPE={cfg}",
+            f"-DCMAKE_BUILD_TYPE=Release",
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
             '-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON',
             '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=OFF',
@@ -128,5 +125,12 @@ setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12"
     ],
 )

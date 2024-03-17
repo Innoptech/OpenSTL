@@ -9,8 +9,12 @@ A simple yet fast header-only library to read/write, serialize/deserialize STL (
 [![Python](https://img.shields.io/pypi/pyversions/openstl.svg)](https://pypi.org/project/openstl/)
 
 # Performances benchmark
-The benchmark results indicate that the performance of multiplying OpenSTL triangles is comparable to that of 
-native NumPy array multiplication.
+Discover the staggering performance of OpenSTL in comparison to numpy-stl, thanks to its powerful C++ backend.   
+
+    Write:  2 to 3 times faster than numpy-stl.
+    Read:   1 to 12 times faster than numpy-stl.
+    Rotate: 1 to 12 times faster than numpy-stl.
+
 ![Benchmark Results](benchmark/benchmark.png)
 
 # Python Usage
@@ -21,76 +25,21 @@ native NumPy array multiplication.
 ```python
 import openstl
 
-# Define a list of triangles
-# Following the STL standard, each triangle is defined with : normal, v0, v1, v2, attribute_byte_count
-# Note: attribute_byte_count can be used for coloring
-triangles = [
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
-]
+# Define an array of triangles
+# Following the STL standard, each triangle is defined with : normal, v0, v1, v2
+triangles = np.array([
+    [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]],
+    [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]],
+])
 
 # Serialize the triangles to a file
-openstl.write("output.stl", triangles, openstl.StlFormat.Binary)
+openstl.write("output.stl", triangles, openstl.format.binary) # Or openstl.format.ascii (slower but human readable)
 
 # Deserialize triangles from a file
 deserialized_triangles = openstl.read("output.stl")
 
 # Print the deserialized triangles
 print("Deserialized Triangles:", deserialized_triangles)
-```
-
-Notes:
-- The format `openstl.StlFormat.ASCII` can be used to make the file human-readable. 
-It is however slower than Binary for reading and writing.
-- `attribute_byte_count` can only be written in **Binary** format. 
-The STL standard do not include it in the ASCII format.
-
-### Access the Triangle attributes
-```python
-import openstl
-
-# Following the STL standard, each triangle is defined with : normal, v0, v1, v2, attribute_byte_count
-triangle = openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
-
-# Access individual vertices
-print("Normal:", triangle.normal)
-print("Vertex 0:", triangle.v0)
-print("Vertex 1:", triangle.v1)
-print("Vertex 2:", triangle.v2)
-
-# Access normal and attribute_byte_count
-print("Attribute Byte Count:", triangle.attribute_byte_count)
-
-# Get length of Triangle (number of elements in buffer)
-print("Length:", len(triangle))
-
-# Get elements using indexing (inefficient, instead use get_vertices)
-print("Elements:", [triangle[i] for i in range(len(triangle))])
-
-# Print Triangle object
-print("Triangle:", triangle)
-```
-
-### Get an efficient view of the vertices
-```python
-import openstl
-
-# Define a list of triangles
-triangles = [
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3),
-    openstl.Triangle([0.0, 0.0, 1.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 0.0], 3)
-]
-
-# Get a view of the vertices (v0, v1, v2) of all triangles by skipping normals and attribute_byte_count
-vertices = openstl.get_vertices(triangles)
-
-# Print the shape of the array
-print("Shape of vertices array:", vertices.shape)
-
-# Print the vertices array
-print("Vertices:", vertices)
 ```
 
 # C++ Usage

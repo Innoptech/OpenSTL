@@ -66,15 +66,15 @@ namespace openstl
      * @param triangles The vector of triangles to serialize.
      * @param stream The output stream to write the serialized data to.
      */
-    template<typename Stream>
-    void serializeAsciiStl(const std::vector<Triangle>& triangles, Stream& stream) {
+    template<typename Stream, typename Container>
+    void serializeAsciiStl(const Container& triangles, Stream& stream) {
         stream << "solid\n";
-        for (const auto& triangle : triangles) {
-            stream << "facet normal " << triangle.normal.x << " " << triangle.normal.y << " " << triangle.normal.z << std::endl;
+        for (const auto& tri : triangles) {
+            stream << "facet normal " << tri.normal.x << " " << tri.normal.y << " " << tri.normal.z << std::endl;
             stream << "outer loop" << std::endl;
-            stream << "vertex " << triangle.v0.x << " " << triangle.v0.y << " " << triangle.v0.z << std::endl;
-            stream << "vertex " << triangle.v1.x << " " << triangle.v1.y << " " << triangle.v1.z << std::endl;
-            stream << "vertex " << triangle.v2.x << " " << triangle.v2.y << " " << triangle.v2.z << std::endl;
+            stream << "vertex " << tri.v0.x << " " << tri.v0.y << " " << tri.v0.z << std::endl;
+            stream << "vertex " << tri.v1.x << " " << tri.v1.y << " " << tri.v1.z << std::endl;
+            stream << "vertex " << tri.v2.x << " " << tri.v2.y << " " << tri.v2.z << std::endl;
             stream << "endloop" << std::endl;
             stream << "endfacet" << std::endl;
         }
@@ -88,8 +88,8 @@ namespace openstl
      * @param triangles The vector of triangles to serialize.
      * @param stream The output stream to write the serialized data.
      */
-    template<typename Stream>
-    void serializeBinaryStl(const std::vector<Triangle>& triangles, Stream& stream) {
+    template<typename Stream, typename Container>
+    void serializeBinaryStl(const Container& triangles, Stream& stream) {
         // Write header (80 bytes for comments)
         char header[80] = {0};
         stream.write(header, 80);
@@ -99,7 +99,8 @@ namespace openstl
         stream.write((const char*)&triangleCount, sizeof(triangleCount));
 
         // Write triangles
-        stream.write((const char*)triangles.data(), sizeof(Triangle)*triangles.size());
+        for (const auto& tri : triangles)
+            stream.write((const char*)&tri, sizeof(Triangle));
     }
 
     /**
@@ -110,8 +111,8 @@ namespace openstl
      * @param stream The output stream to write the serialized data.
      * @param format The format of the STL file (ASCII or binary).
      */
-    template <typename Stream>
-    inline void serializeStl(const std::vector<Triangle>& triangles, Stream& stream, StlFormat format) {
+    template <typename Stream, typename Container>
+    inline void serializeStl(const Container& triangles, Stream& stream, StlFormat format) {
         switch (format) {
             case StlFormat::ASCII:
                 serializeAsciiStl(triangles, stream);
