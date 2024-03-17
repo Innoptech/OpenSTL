@@ -1,7 +1,7 @@
 import pytest, os
 import numpy as np
 import openstl
-
+import gc
 
 @pytest.fixture
 def sample_triangles():
@@ -16,6 +16,7 @@ def test_get_vertices(sample_triangles):
     assert np.allclose(vertices[-1,-1], [3, 3, 3])
 
 def test_write_and_read(sample_triangles):
+    gc.disable()
     filename = "test.stl"
     
     # Write triangles to file
@@ -23,6 +24,7 @@ def test_write_and_read(sample_triangles):
 
     # Read triangles from file
     triangles_read = openstl.read(filename)
+    gc.collect()
     assert len(triangles_read) == len(sample_triangles)
     for i in range(len(triangles_read)):
         assert np.allclose(triangles_read[i], sample_triangles[i]) # Will compare normal and vertices
@@ -34,6 +36,7 @@ def test_fail_on_read():
     filename = "donoexist.stl"
     triangles_read = openstl.read(filename)
     assert len(triangles_read) == 0
+
 
 if __name__ == "__main__":
     pytest.main()

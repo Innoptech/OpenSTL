@@ -59,6 +59,15 @@ jobs:
           python3 -m pip install --index-url https://test.pypi.org/simple/ openstl
           python3 -m pip install numpy pytest
           pytest ./tests/python
+      - name: Run the benchmark
+        run: |
+          python3 -m pip install numpy-stl meshio matplotlib
+          pytest ./benchmark/benchmark.py
+      - name: Store the benchmark
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package-distributions
+          path: benchmark/benchmark.png
   publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
     needs:
