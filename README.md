@@ -36,16 +36,35 @@ quad = np.array([
 ])
 
 # Serialize the triangles to a file
-success = openstl.write("output.stl", quad, openstl.format.binary) # Or openstl.format.ascii (slower but human readable)
+success = openstl.write("quad.stl", quad, openstl.format.binary) # Or openstl.format.ascii (slower but human readable)
 
 if not success:
     raise Exception("Error: Failed to write to the specified file.")
 
 # Deserialize triangles from a file
-deserialized_quad = openstl.read("output.stl")
+deserialized_quad = openstl.read("quad.stl")
 
 # Print the deserialized triangles
 print("Deserialized Triangles:", deserialized_quad)
+```
+### Rotate and translate a mesh
+```python
+import openstl
+import numpy as np
+
+quad = openstl.read("quad.stl")
+
+# Rotation
+rotation_matrix = np.array([
+    [0,-1, 0],
+    [1, 0, 0],
+    [0, 0, 1]
+])
+rotated_quad = np.matmul(rotation_matrix, quad.reshape(-1,3).T).T.reshape()
+
+# Translation
+translation_vector = np.array([1,1,1])
+quad[:,1:4,:] += translation_vector # Avoid translating normals
 ```
 
 # C++ Usage
