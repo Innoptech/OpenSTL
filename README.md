@@ -17,7 +17,7 @@ See [benchmark.py](benchmark/benchmark.py). Benchmark performed on an Intel i5-9
     Write:  1.3 to 4+ times faster
     Read:   1 to 2.3+ times faster
     Rotate: 1 to 12+ times faster
-Note: meshio has no straightfoward way of rotating vertices, so it was not benchmarked for this lib. 
+Note: meshio has no straightfoward way of rotating vertices, so it was not benchmarked. 
 ![Benchmark Results](benchmark/benchmark.png)
 
 # Python Usage
