@@ -86,8 +86,6 @@ if __name__ == "__main__":
 
     # Exclude 1rst operation (openstl dyn lib loading)
     write_time = benchmark_write(1, filename)
-    write_time = benchmark_write_numpy_stl(1, filename)
-    write_time = benchmark_write_meshio(1, filename)
 
     for num_triangles in num_triangles_list:
         write_time = benchmark_write(num_triangles, filename)
@@ -97,6 +95,9 @@ if __name__ == "__main__":
         read_times_openstl.append(read_time)
         rotate_openstl.append(rotate_time)
 
+    # Exclude 1rst operation (openstl dyn lib loading)
+    write_time = benchmark_write_numpy_stl(1, filename)
+
     for num_triangles in num_triangles_list:
         write_time = benchmark_write_numpy_stl(num_triangles, filename)
         read_time = benchmark_read_numpy_stl(filename)
@@ -105,6 +106,9 @@ if __name__ == "__main__":
         write_numpy_stl_times.append(write_time)
         rotate_numpy_stl.append(rotate_time)
         
+    # Exclude 1rst operation (openstl dyn lib loading)
+    write_time = benchmark_write_meshio(1, filename)
+
     for num_triangles in num_triangles_list:
         write_time = benchmark_write_meshio(num_triangles, filename)
         read_time = benchmark_read_meshio(filename)
