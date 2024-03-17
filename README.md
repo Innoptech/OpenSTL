@@ -11,9 +11,9 @@ An intuitive and fast header-only library to read/write, serialize/deserialize S
 # Performances benchmark
 Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl),
  [meshio](https://github.com/nschloe/meshio) and [stl-reader](https://github.com/pyvista/stl-reader), thanks to its powerful C++ backend.
-See [benchmark.py](benchmark/benchmark.py)   
+See [benchmark.py](benchmark/benchmark.py). Benchmark performed on an Intel i5-9600KF CPU @ 3.70GHz.
 
-    Performance gains over numpy-stl and meshio
+    Performance gains over numpy-stl, meshio and stl-reader
     Write:  1.3 to 4+ times faster
     Read:   1 to 2.3+ times faster
     Rotate: 1 to 12+ times faster
