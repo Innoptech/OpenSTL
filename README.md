@@ -24,22 +24,26 @@ Discover the staggering performance of OpenSTL in comparison to [numpy-stl](http
 ### Read and write from a STL file
 ```python
 import openstl
+import numpy as np
 
 # Define an array of triangles
 # Following the STL standard, each triangle is defined with : normal, v0, v1, v2
-triangles = np.array([
+quad = np.array([
     [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]],
     [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]],
 ])
 
 # Serialize the triangles to a file
-openstl.write("output.stl", triangles, openstl.format.binary) # Or openstl.format.ascii (slower but human readable)
+success = openstl.write("output.stl", quad, openstl.format.binary) # Or openstl.format.ascii (slower but human readable)
+
+if not success:
+    raise Exception("Error: Failed to write to the specified file.")
 
 # Deserialize triangles from a file
-deserialized_triangles = openstl.read("output.stl")
+deserialized_quad = openstl.read("output.stl")
 
 # Print the deserialized triangles
-print("Deserialized Triangles:", deserialized_triangles)
+print("Deserialized Triangles:", deserialized_quad)
 ```
 
 # C++ Usage
