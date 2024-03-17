@@ -41,7 +41,7 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         REQUIRE(stream.is_open());
 
         // Serialize the triangles in binary format
-        serializeStl(originalTriangles, stream, StlFormat::Binary);
+        serialize(originalTriangles, stream, StlFormat::Binary);
         REQUIRE_FALSE(stream.fail());
         stream.close();
 
@@ -58,7 +58,7 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         std::stringstream ss;
 
         // Serialize the triangles in binary format
-        serializeStl(originalTriangles, ss, StlFormat::Binary);
+        serialize(originalTriangles, ss, StlFormat::Binary);
 
         // Deserialize the serialized triangles
         ss.seekg(0);
@@ -78,7 +78,7 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         REQUIRE(stream.is_open());
 
         // Serialize the triangles in ASCII format
-        serializeStl(originalTriangles, stream, StlFormat::ASCII);
+        serialize(originalTriangles, stream, StlFormat::ASCII);
         REQUIRE_FALSE(stream.fail());
         stream.close();
 

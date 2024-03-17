@@ -112,7 +112,7 @@ namespace openstl
      * @param format The format of the STL file (ASCII or binary).
      */
     template <typename Stream, typename Container>
-    inline void serializeStl(const Container& triangles, Stream& stream, StlFormat format) {
+    inline void serialize(const Container& triangles, Stream& stream, StlFormat format) {
         switch (format) {
             case StlFormat::ASCII:
                 serializeAsciiStl(triangles, stream);

@@ -129,7 +129,7 @@ void serialize(py::module_ &m) {
             return false;
 
         StridedTriangleSpan stridedIter{buf.data(), (size_t)buf.shape(0)};
-        openstl::serializeStl(stridedIter, file, format); // Or StlFormat::ASCII
+        openstl::serialize(stridedIter, file, format);
 
         if (file.fail()) {
             std::cerr << "Error: Failed to write to file " << filename << std::endl;

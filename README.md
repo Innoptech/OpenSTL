@@ -89,7 +89,7 @@ if (!file.is_open()) {
 }
 
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
-openstl::serializeStl(originalTriangles, file, openstl::StlFormat::Binary); // Or StlFormat::ASCII
+openstl::serialize(originalTriangles, file, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 
 if (file.fail()) {
     std::cerr << "Error: Failed to write to file " << filename << std::endl;
@@ -104,7 +104,7 @@ file.close();
 std::stringstream ss;
 
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
-openstl::serializeStl(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
+openstl::serialize(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 ```
 
 # Integrate to your codebase
