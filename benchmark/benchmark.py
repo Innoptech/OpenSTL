@@ -3,6 +3,7 @@ import numpy as np
 import meshio
 import timeit
 from stl import mesh, Mode
+import stl_reader
 import matplotlib.pyplot as plt
 
 #-----------------------------------------------------
@@ -68,11 +69,18 @@ def benchmark_read_meshio(filename):
     result = timeit.timeit(lambda: meshio.read(filename), number=5)
     return result
 
+#-----------------------------------------------------
+# stl-reader
+#-----------------------------------------------------
+def benchmark_read_stl_reader(filename):
+    result = timeit.timeit(lambda: stl_reader.read(filename), number=5)
+    return result
+
 
 if __name__ == "__main__":
     # Benchmark parameters
     filename = "benchmark.stl"
-    num_triangles_list = np.logspace(1,6,15).round().astype(int)
+    num_triangles_list = np.logspace(1,5,15).round().astype(int)
 
     # Benchmarking
     write_times_openstl = []
@@ -83,9 +91,11 @@ if __name__ == "__main__":
     rotate_numpy_stl = []
     read_meshio_times = []
     write_meshio_times = []
+    read_stl_reader_times = []
 
     # Exclude 1rst operation (openstl dyn lib loading)
     write_time = benchmark_write(1, filename)
+    read_time = benchmark_read_stl_reader(filename)
 
     for num_triangles in num_triangles_list:
         write_time = benchmark_write(num_triangles, filename)
@@ -94,6 +104,10 @@ if __name__ == "__main__":
         write_times_openstl.append(write_time)
         read_times_openstl.append(read_time)
         rotate_openstl.append(rotate_time)
+
+        read_time = benchmark_read_stl_reader(filename)
+        read_stl_reader_times.append(read_time)
+
 
     # Exclude 1rst operation (openstl dyn lib loading)
     write_time = benchmark_write_numpy_stl(1, filename)
@@ -105,7 +119,8 @@ if __name__ == "__main__":
         read_numpy_stl_times.append(read_time)
         write_numpy_stl_times.append(write_time)
         rotate_numpy_stl.append(rotate_time)
-        
+
+
     # Exclude 1rst operation (openstl dyn lib loading)
     write_time = benchmark_write_meshio(1, filename)
 
@@ -114,7 +129,7 @@ if __name__ == "__main__":
         read_time = benchmark_read_meshio(filename)
         write_meshio_times.append(write_time)
         read_meshio_times.append(read_time)
-
+        
 
     # Results
     write_diff_np = (np.array(write_numpy_stl_times) / np.array(write_times_openstl)).round(3)
@@ -129,6 +144,9 @@ if __name__ == "__main__":
     print(f"Write:\tOpenSTL is {np.min(write_diff_mi)} to {np.max(write_diff_mi)} X faster than meshio")
     print(f"Read:\tOpenSTL is {np.min(read_diff_mi)} to {np.max(read_diff_mi)} X faster than meshio")
 
+    read_diff_stl_reader =  (np.array(read_stl_reader_times) / np.array(read_times_openstl)).round(3)
+    print(f"Read:\tOpenSTL is {np.min(read_diff_stl_reader)} to {np.max(read_diff_stl_reader)} X faster than stl_reader")
+
     # Plotting
     plt.figure(figsize=(10, 6))  # Set figure size for better visualization
     plt.plot(num_triangles_list, write_times_openstl, label="Write (OpenSTL)", color="green", linestyle="-", marker="s", markersize=7, linewidth=3)
@@ -139,20 +157,21 @@ if __name__ == "__main__":
     plt.plot(num_triangles_list, rotate_numpy_stl, label="Rotate (numpy-stl)", color="red", linestyle="--", marker="o", markersize=5, alpha=0.5)
     plt.plot(num_triangles_list, write_meshio_times, label="Write (meshio)", color="green", linestyle=":", marker="^", markersize=5, alpha=0.5)
     plt.plot(num_triangles_list, read_meshio_times, label="Read (meshio)", color="blue", linestyle=":", marker="^", markersize=5, alpha=0.5)
+    plt.plot(num_triangles_list, read_stl_reader_times, label="Read (stl_reader)", color="blue", linestyle="-.", marker="x", markersize=5, alpha=0.5)
 
     plt.xlabel("Number of Triangles", fontsize=12)
     plt.ylabel("Time (seconds)", fontsize=12)
     plt.title("Python Benchmark Results", fontsize=14)
     plt.xscale("log")
     plt.yscale("log")
-    plt.legend(fontsize=10, handlelength=5)
+    plt.legend(fontsize=10, handlelength=5, loc='upper left')
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)  # Add grid lines with dashed style
     plt.tight_layout()  # Adjust layout to prevent clipping of labels
 
 
     # Adjusting axes limits and scaling
     plt.xlim(num_triangles_list[0], num_triangles_list[-1]*1.1)  # Extend x-axis range by 10%
-    plt.ylim(min(min(write_times_openstl), min(read_times_openstl), min(read_numpy_stl_times), min(write_numpy_stl_times)) * 0.5,
-             max(max(write_times_openstl), max(read_times_openstl), max(read_numpy_stl_times), max(write_numpy_stl_times)) * 2)  # Expand y-axis range
+    plt.ylim(min(min(write_times_openstl), min(read_times_openstl), min(read_numpy_stl_times), min(write_numpy_stl_times), min(read_diff_stl_reader)) * 0.5,
+             max(max(write_times_openstl), max(read_times_openstl), max(read_numpy_stl_times), max(write_numpy_stl_times), max(read_diff_stl_reader)) * 2)  # Expand y-axis range
 
     plt.savefig('benchmark.png')

@@ -9,14 +9,15 @@ An intuitive and fast header-only library to read/write, serialize/deserialize S
 [![Python](https://img.shields.io/pypi/pyversions/openstl.svg)](https://pypi.org/project/openstl/)
 
 # Performances benchmark
-Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl) and
-to [meshio](https://github.com/nschloe/meshio), thanks to its powerful C++ backend.   
+Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl),
+to [meshio](https://github.com/nschloe/meshio) and [stl-reader](https://github.com/pyvista/stl-reader), thanks to its powerful C++ backend.
+See [benchmark.py](benchmark/benchmark.py)   
 
     Performance gains over numpy-stl and meshio
-    Write:  1.3 to 3+ times faster
-    Read:   1 to 12+ times faster
+    Write:  1.3 to 4+ times faster
+    Read:   1 to 2.3+ times faster
     Rotate: 1 to 12+ times faster
-Note: meshio has no straightfoward way of rotating vertices, so rotation was not benchmarked for this lib.
+Note: meshio has no straightfoward way of rotating vertices, so it was not benchmarked for this lib. 
 ![Benchmark Results](benchmark/benchmark.png)
 
 # Python Usage
