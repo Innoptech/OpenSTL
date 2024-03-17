@@ -13,7 +13,7 @@ Discover the staggering performance of OpenSTL in comparison to [numpy-stl](http
 to [meshio](https://github.com/nschloe/meshio), thanks to its powerful C++ backend.   
 
     Performance gains over numpy-stl and meshio
-    Write:  1.3 to 14+ times faster
+    Write:  1.3 to 3+ times faster
     Read:   1 to 12+ times faster
     Rotate: 1 to 12+ times faster
 Note: meshio has no straightfoward way of rotating vertices, so rotation was not benchmarked for this lib.
