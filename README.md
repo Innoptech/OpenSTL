@@ -48,14 +48,14 @@ deserialized_quad = openstl.read("quad.stl")
 # Print the deserialized triangles
 print("Deserialized Triangles:", deserialized_quad)
 ```
-### Rotate and translate a mesh
+### Rotate, translate and scale a mesh
 ```python
 import openstl
 import numpy as np
 
 quad = openstl.read("quad.stl")
 
-# Rotation
+# Rotating
 rotation_matrix = np.array([
     [0,-1, 0],
     [1, 0, 0],
@@ -63,9 +63,13 @@ rotation_matrix = np.array([
 ])
 rotated_quad = np.matmul(rotation_matrix, quad.reshape(-1,3).T).T.reshape(-1,4,3)
 
-# Translation
+# Translating
 translation_vector = np.array([1,1,1])
 quad[:,1:4,:] += translation_vector # Avoid translating normals
+
+# Scaling
+scale = 1000.0
+quad[:,1:4,:] *= scale # Avoid scaling normals
 ```
 
 # C++ Usage
