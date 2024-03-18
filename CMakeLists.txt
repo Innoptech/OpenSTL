@@ -63,7 +63,7 @@ endif()
 # No external component at runtime
 
 #-------------------------------------------------------------------------------
-# Add components & Package multiflash in simpler header files
+# Add module components 
 #-------------------------------------------------------------------------------
 set(OPENSTL_MODULES core)
 foreach(module ${OPENSTL_MODULES})
