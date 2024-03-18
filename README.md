@@ -1,5 +1,5 @@
 # OpenSTL
-The fastest and most intuitive library to read/write, serialize/deserialize STL (stereolithography) files and data for C++ and Python, header-only. 
+The fastest and most intuitive library to manipulate STL files (stereolithography) for C++ and Python, header-only. 
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)](http://commitizen.github.io/cz-cli/)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
