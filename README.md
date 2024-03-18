@@ -61,7 +61,7 @@ rotation_matrix = np.array([
     [1, 0, 0],
     [0, 0, 1]
 ])
-rotated_quad = np.matmul(rotation_matrix, quad.reshape(-1,3).T).T.reshape()
+rotated_quad = np.matmul(rotation_matrix, quad.reshape(-1,3).T).T.reshape(-1,4,3)
 
 # Translation
 translation_vector = np.array([1,1,1])
