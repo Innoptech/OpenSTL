@@ -1,5 +1,6 @@
 # OpenSTL
-The fastest and most intuitive library to manipulate STL files (stereolithography) for C++ and Python, header-only. 
+The fastest and most intuitive library to manipulate STL files (stereolithography) for C++ and Python, header-only.   
+🌟 Please consider starring the GitHub repo to show your support! 🌟
 
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat-square)](http://commitizen.github.io/cz-cli/)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat-square)](https://conventionalcommits.org)
