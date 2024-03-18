@@ -164,7 +164,7 @@ if __name__ == "__main__":
     plt.title("Python Benchmark Results", fontsize=14)
     plt.xscale("log")
     plt.yscale("log")
-    plt.legend(fontsize=10, handlelength=5, loc='upper left')
+    plt.legend(fontsize=10, handlelength=5, loc='upper left', ncol=3)
     plt.grid(True, which="both", linestyle="--", linewidth=0.5)  # Add grid lines with dashed style
     plt.tight_layout()  # Adjust layout to prevent clipping of labels
 
