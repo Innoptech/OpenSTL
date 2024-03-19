@@ -6,10 +6,7 @@ from pathlib import Path
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
-#from single_source import get_version
-#__version__ = get_version("cz_conventional_commits", '.')
 
-# A simple function to read the repo version
 def read_version_from_pyproject(file_path):
     with open(file_path, 'r') as file:
         content = file.read()
@@ -24,9 +21,6 @@ def read_version_from_pyproject(file_path):
         return None
 
 
-# A CMakeExtension needs a sourcedir instead of a file list.
-# The name must be the _single_ output extension from the CMake build.
-# If you need multiple extensions, see scikit-build.
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "", cmake: str = "cmake") -> None:
         super().__init__(name, sources=[])
@@ -35,23 +29,12 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
+    # Inspired by pybind/cmake_example
+    # https://github.com/pybind/cmake_example/blob/835e1a81b01d06097ccbb7b8f214ef9bd2d0c159/setup.py
     def build_extension(self, ext: CMakeExtension) -> None:
-        # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
-        ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)  # type: ignore[no-untyped-call]
+        ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
 
-        # Print the list of files in the source directory
-        print(f"Files in source directory:")
-        for filename in os.listdir(ext.sourcedir):
-            print(filename)
-
-        # CMake lets you override the generator - we need to check this.
-        # Can be set with Conda-Build, for example.
-        cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
-
-        # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
-        # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
-        # from Python.
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
@@ -64,19 +47,12 @@ class CMakeBuild(build_ext):
             '-DOPENSTL_BUILD_PYTHON:BOOL=ON'
         ]
         build_args = []
-        # Adding CMake arguments set as environment variable
-        # (needed e.g. to build for ARM OSx on conda-forge)
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
 
-        # Set CMAKE_BUILD_PARALLEL_LEVEL to control the parallel build level
-        # across all generators.
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
-            # self.parallel is a Python 3 only way to set parallel jobs by hand
-            # using -j in the build_ext call, not supported by pip or PyPA-build.
             if hasattr(self, "parallel") and self.parallel:
-                # CMake 3.12+ only.
                 build_args += [f"-j{self.parallel}"]
 
         build_temp = Path(self.build_temp) / ext.name
