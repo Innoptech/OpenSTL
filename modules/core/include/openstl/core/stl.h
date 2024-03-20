@@ -91,7 +91,7 @@ namespace openstl
     template<typename Stream, typename Container>
     void serializeBinaryStl(const Container& triangles, Stream& stream) {
         // Write header (80 bytes for comments)
-        char header[80] = {0};
+        char header[80] = "STL Exported by OpenSTL [https://github.com/Innoptech/OpenSTL]";
         stream.write(header, 80);
 
         // Write triangle count (4 bytes)
