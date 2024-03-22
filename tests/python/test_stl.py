@@ -1,5 +1,6 @@
 import pytest, os
 import numpy as np
+import typing
 import openstl
 import gc
 
@@ -39,8 +40,8 @@ def test_fail_on_read():
 
 
 # Define Face and Vec3 as tuples
-Face = tuple[int, int, int]  # v0, v1, v2
-Vec3 = tuple[float, float, float]
+Face = typing.Tuple[int, int, int]  # v0, v1, v2
+Vec3 = typing.Tuple[float, float, float]
 
 def are_all_unique(arr: list) -> bool:
     """Check if all elements in the array are unique."""
@@ -52,7 +53,7 @@ def are_all_unique(arr: list) -> bool:
     return True
 
 
-def are_faces_equal(face1: Face, face2: Face, v1: list[Vec3], v2: list[Vec3]) -> bool:
+def are_faces_equal(face1: Face, face2: Face, v1: typing.List[Vec3], v2: typing.List[Vec3]) -> bool:
     """Check if two Face objects are equal."""
     # Vertices v0, v1, v2 can be shuffled between two equal faces
     assert len(np.unique(face1)) == len(np.unique(face2))
@@ -62,7 +63,8 @@ def are_faces_equal(face1: Face, face2: Face, v1: list[Vec3], v2: list[Vec3]) ->
     return True
 
 
-def all_faces_valid(faces: list[Face], final_faces: list[Face], vertices: list[Vec3], final_vertices: list[Vec3]) -> bool:
+def all_faces_valid(faces: typing.List[Face], final_faces: typing.List[Face], 
+                    vertices: typing.List[Vec3], final_vertices: typing.List[Vec3]) -> bool:
     """Check if all original faces are present in the final faces."""
     return all(any(are_faces_equal(face, final_f, vertices, final_vertices) for final_f in final_faces) for face in faces)
 
