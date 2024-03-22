@@ -74,7 +74,7 @@ scale = 1000.0
 quad[:,1:4,:] *= scale # Avoid scaling normals
 ```
 
-### Converting Triangles --> Vertices and Faces
+### Converting Triangles -> Vertices and Faces
 ```python
 import openstl
 
@@ -89,7 +89,7 @@ triangles = [
 vertices, faces = openstl.convert.verticesandfaces(triangles)
 ```
 
-### Converting Vertices and Faces --> Triangles
+### Converting Vertices and Faces -> Triangles
 ```python
 import openstl
 
@@ -113,6 +113,8 @@ triangles = openstl.convert.triangles(vertices, faces)
 # C++ Usage
 ### Read STL from file
 ```c++
+#include <openstl/core/stl.h>
+
 std::ifstream file(filename, std::ios::binary);
 if (!file.is_open()) {
     std::cerr << "Error: Unable to open file '" << filename << "'" << std::endl;
@@ -147,6 +149,33 @@ std::stringstream ss;
 
 std::vector<openstl::Triangle> originalTriangles{}; // User triangles
 openstl::serialize(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
+```
+
+### Converting Triangles -> Vertices and Faces
+```c++
+using namespace openstl
+
+std::vector triangles = {
+    //        normal,             vertices 0,         vertices 1,        vertices 2
+    Triangle{{0.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {2.0f, 2.0f, 2.0f}, {3.0f, 3.0f, 3.0f}},
+    Triangle{{0.0f, 0.0f, 1.0f}, {2.0f, 2.0f, 2.0f}, {3.0f, 3.0f, 3.0f}, {4.0f, 4.0f, 4.0f}}
+};
+
+const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
+```
+
+### Converting Vertices and Faces -> Triangles
+```c++
+using namespace openstl
+
+std::vector vertices = {
+    Vec3{0.0f, 0.0f, 0.0f}, Vec3{1.0f, 1.0f, 1.0f}, Vec3{2.0f, 2.0f, 2.0f}, Vec3{3.0f, 3.0f, 3.0f}
+};
+std::vector<Face> faces = {
+    {0, 1, 2}, {3, 1, 2}
+};
+
+const auto& triangles = convertToTriangles(vertices, faces);
 ```
 
 # Integrate to your codebase
