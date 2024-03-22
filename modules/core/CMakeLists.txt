@@ -25,5 +25,4 @@ configure_file(include/openstl/core/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/gen
 #-------------------------------------------------------------------------------
 add_library(openstl_core INTERFACE)
 target_include_directories(openstl_core INTERFACE include/ ${CMAKE_CURRENT_BINARY_DIR}/generated/)
-target_link_libraries(openstl_core INTERFACE)
 add_library(openstl::core ALIAS openstl_core)

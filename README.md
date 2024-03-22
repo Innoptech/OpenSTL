@@ -74,6 +74,42 @@ scale = 1000.0
 quad[:,1:4,:] *= scale # Avoid scaling normals
 ```
 
+### Converting Triangles --> Vertices and Faces
+```python
+import openstl
+
+# Define an array of triangles
+triangles = [
+    # normal,          vertices 0,      vertices 1,      vertices 2
+    [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]], # Triangle 1
+    [[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]], # Triangle 2
+]
+
+# Convert triangles to vertices and faces
+vertices, faces = openstl.convert.verticesandfaces(triangles)
+```
+
+### Converting Vertices and Faces --> Triangles
+```python
+import openstl
+
+# Define vertices and faces
+vertices = [
+    [0.0, 0.0, 0.0],
+    [1.0, 1.0, 1.0],
+    [2.0, 2.0, 2.0],
+    [3.0, 3.0, 3.0],
+]
+
+faces = [
+    [0, 1, 2],  # Face 1 
+    [1, 3, 2]   # Face 2 
+]
+
+# Convert vertices and faces to triangles
+triangles = openstl.convert.triangles(vertices, faces)
+``` 
+
 # C++ Usage
 ### Read STL from file
 ```c++

@@ -24,18 +24,15 @@ SOFTWARE.
 
 #ifndef OPENSTL_OPENSTL_SERIALIZE_H
 #define OPENSTL_OPENSTL_SERIALIZE_H
-#include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
+#include <iostream>
 #include <vector>
-#include <cmath>
 #include <iterator>
-
-#include <unordered_set>
-#include <vector>
+#include <unordered_map>
 #include <tuple>
-#include <cstddef>
+#include <cmath>
+#include <algorithm>
 
 namespace openstl
 {
@@ -241,6 +238,8 @@ namespace openstl
     //---------------------------------------------------------------------------------------------------------
     // Transformation Utils
     //---------------------------------------------------------------------------------------------------------
+    using Face = std::array<size_t, 3>; // v0, v1, v2
+
     inline bool operator==(const Vec3& rhs, const Vec3& lhs) {
         return std::tie(rhs.x, rhs.y, rhs.z) == std::tie(lhs.x, lhs.y, lhs.z);
     }
@@ -253,21 +252,94 @@ namespace openstl
     };
 
     /**
-     * @brief Finds unique vertices from a vector of triangles.
-     *
-     * @param triangles The vector of triangles from which to find unique vertices.
-     * @return An unordered_set containing unique Vec3 vertices.
+     * @brief  Find the inverse map: vertex -> face idx
+     * @param triangles The container of triangles from which to find unique vertices
+     * @return A hash map that maps: for each unique vertex -> a vector of corresponding face indices
      */
-    inline std::unordered_set<Vec3, Vec3Hash> findUniqueVertices(const std::vector<Triangle>& triangles) {
-        std::unordered_set<Vec3, Vec3Hash> uniqueVertices;
+    template<typename Container>
+    inline std::unordered_map<Vec3, std::vector<size_t>, Vec3Hash> findInverseMap(const Container& triangles)
+    {
+        std::unordered_map<Vec3, std::vector<size_t>, Vec3Hash> map{};
+        size_t triangleIdx{0};
+        for (const auto& tri : triangles) {
+            for(const auto vertex : {&tri.v0, &tri.v1, &tri.v2})
+            {
+                auto it = map.find(*vertex);
+                if (it != std::end(map)) {
+                    it->second.emplace_back(triangleIdx);
+                    continue;
+                }
+                map[*vertex] = {triangleIdx};
+            }
+            ++triangleIdx;
+        }
+        return map;
+    }
 
-        for (const auto& triangle : triangles) {
-            uniqueVertices.insert({triangle.v0.x, triangle.v0.y, triangle.v0.z});
-            uniqueVertices.insert({triangle.v1.x, triangle.v1.y, triangle.v1.z});
-            uniqueVertices.insert({triangle.v2.x, triangle.v2.y, triangle.v2.z});
+
+    /**
+     * @brief Finds unique vertices from a vector of triangles
+     * @param triangles The container of triangles to convert
+     * @return An tuple containing respectively the vector of vertices and the vector of face indices
+     */
+    template<typename Container>
+    inline std::tuple<std::vector<Vec3>, std::vector<Face>>
+    convertToVerticesAndFaces(const Container& triangles) {
+        const auto& inverseMap = findInverseMap(triangles);
+        auto verticesNum = inverseMap.size();
+        std::vector<Vec3> vertices{}; vertices.reserve(verticesNum);
+        std::vector<Face> faces(triangles.size());
+        std::vector<uint8_t> vertexPositionInFace(triangles.size(), 0u);
+        size_t vertexIdx{0};
+        for(const auto& item : inverseMap) {
+            vertices.emplace_back(item.first);
+            // Multiple faces can have the same vertex index
+            for(const auto faceIdx : item.second)
+                faces[faceIdx][vertexPositionInFace[faceIdx]++] = vertexIdx;
+            ++vertexIdx;
+        }
+        return std::make_tuple(std::move(vertices), std::move(faces));
+    }
+
+    inline Vec3 operator-(const Vec3& rhs, const Vec3& lhs) {
+        return {rhs.x - lhs.x, rhs.y - lhs.y, rhs.z - lhs.z};
+    }
+
+    inline Vec3 crossProduct(const Vec3& a, const Vec3& b) {
+        return {a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x};
+    }
+
+    /**
+     * @brief Convert vertices and faces to triangles.
+     * @param vertices The container of vertices.
+     * @param faces The container of faces.
+     * @return A vector of triangles constructed from the vertices and faces.
+     */
+    template<typename ContainerA, typename ContainerB>
+    inline std::vector<Triangle> convertToTriangles(const ContainerA& vertices, const ContainerB& faces)
+    {
+        if (faces.size() == 0)
+            return {};
+
+        std::vector<Triangle> triangles; triangles.reserve(faces.size());
+        auto getVertex = [&vertices](std::size_t index) {
+            return std::next(std::begin(vertices), index);
+        };
+        auto minmax = std::max_element(&std::begin(faces)->at(0), &std::begin(faces)->at(0)+faces.size()*3);
+
+        // Check if the minimum and maximum indices are within the bounds of the vector
+        if (*minmax >= static_cast<int>(vertices.size())) {
+            throw std::out_of_range("Face index out of range");
         }
 
-        return uniqueVertices;
+        for (const auto& face : faces) {
+            auto v0 = getVertex(face[0]);
+            auto v1 = getVertex(face[1]);
+            auto v2 = getVertex(face[2]);
+            const auto normal = crossProduct(*v1 - *v0, *v2 - *v0);
+            triangles.emplace_back(Triangle{normal, *v0, *v1, *v2, 0u});
+        }
+        return triangles;
     }
 } //namespace openstl
 #endif //OPENSTL_OPENSTL_SERIALIZE_H
