@@ -10,7 +10,7 @@ endmacro()
 
 macro(ReadDependencyVersion dependency_name version_file)
     file(READ ${version_file} ver)
-    string(REGEX MATCH "${dependency_name}\ *=\ *\"([^\"]*)\"" _ ${ver})
+    string(REGEX MATCH "${dependency_name}\ *=\ *\"?([^\"]*)\"?" _ ${ver})
     set(${dependency_name}_VERSION "${CMAKE_MATCH_1}")
     message(STATUS "${dependency_name} version: ${${dependency_name}_VERSION}")
 endmacro()

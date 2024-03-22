@@ -17,5 +17,5 @@ tag_format = "v$version"
 
 
 [tool.poetry.dependencies]
-pybind11 = "2.11.1"
-catch2 = "3.5.3"
+pybind11 = "v2.11.1"
+catch2 = "v3.5.3"
