@@ -74,7 +74,7 @@ scale = 1000.0
 quad[:,1:4,:] *= scale # Avoid scaling normals
 ```
 
-### Convert Triangles -> Vertices and Faces
+### Convert Triangles :arrow_right: Vertices and Faces
 ```python
 import openstl
 
@@ -89,7 +89,7 @@ triangles = [
 vertices, faces = openstl.convert.verticesandfaces(triangles)
 ```
 
-### Convert Vertices and Faces -> Triangles
+### Convert Vertices and Faces :arrow_right: Triangles
 ```python
 import openstl
 
@@ -151,7 +151,7 @@ std::vector<openstl::Triangle> originalTriangles{}; // User triangles
 openstl::serialize(originalTriangles, ss, openstl::StlFormat::Binary); // Or StlFormat::ASCII
 ```
 
-### Convert Triangles -> Vertices and Faces
+### Convert Triangles :arrow_right: Vertices and Faces
 ```c++
 using namespace openstl
 
@@ -164,7 +164,7 @@ std::vector triangles = {
 const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
 ```
 
-### Convert Vertices and Faces -> Triangles
+### Convert Vertices and Faces :arrow_right: Triangles
 ```c++
 using namespace openstl
 
