@@ -21,6 +21,18 @@ def read_version_from_pyproject(file_path):
     else:
         return None
 
+def get_cmake_architecture_flags():
+    system = platform.system()
+    is_64bits = sys.maxsize > 2**32
+
+    if system == "Linux":
+        architecture_flag = "-m64" if is_64bits else "-m32"
+        return [f"CMAKE_C_FLAGS={architecture_flag}", f"CMAKE_CXX_FLAGS={architecture_flag}",]
+    elif system == "Darwin":  # macOS
+        return [f"-DCMAKE_OSX_ARCHITECTURES={'x86_64' if is_64bits else 'i386'}"]
+    elif system == "Windows":
+        return ["-A x64"] if is_64bits else ["-A Win32"]
+    return []
 
 class CMakeExtension(Extension):
     def __init__(self, name: str, sourcedir: str = "", cmake: str = "cmake") -> None:
@@ -30,47 +42,36 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
-    # Inspired by pybind/cmake_example
-    # https://github.com/pybind/cmake_example/blob/835e1a81b01d06097ccbb7b8f214ef9bd2d0c159/setup.py
     def build_extension(self, ext: CMakeExtension) -> None:
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
 
-        # Detect Python architecture
-        architecture_flag = "-m64" if platform.architecture()[0] == "64bit" else "-m32"
-
         cmake_args = [
-            f"CMAKE_C_FLAGS={architecture_flag}",
-            f"CMAKE_CXX_FLAGS={architecture_flag}",
-            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DPYTHON_INCLUDE_DIR={sysconfig.get_path('include')}",
             f"-DPYTHON_LIBRARY={sysconfig.get_config_var('LIBDIR')}",
-            f"-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_BUILD_TYPE=Release",
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
             '-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON',
             '-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=OFF',
             '-DOPENSTL_BUILD_PYTHON:BOOL=ON'
-        ]
-        build_args = []
+        ] + get_cmake_architecture_flags()
+
         if "CMAKE_ARGS" in os.environ:
-            cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
+            cmake_args += os.environ["CMAKE_ARGS"].split()
+
+        build_temp = Path(self.build_temp) / ext.name
+        build_temp.mkdir(parents=True, exist_ok=True)
 
 
+        subprocess.run([ext.cmake, ext.sourcedir] + cmake_args, cwd=build_temp, check=True)
+
+        build_args = []
         if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
             if hasattr(self, "parallel") and self.parallel:
                 build_args += [f"-j{self.parallel}"]
-
-        build_temp = Path(self.build_temp) / ext.name
-        if not build_temp.exists():
-            build_temp.mkdir(parents=True)
-
-        subprocess.run(
-            [ext.cmake, ext.sourcedir] + cmake_args, cwd=build_temp, check=True
-        )
-        subprocess.run(
-            [ext.cmake, "--build", "."] + build_args, cwd=build_temp, check=True
-        )
+        subprocess.run([ext.cmake, "--build", "."] + build_args, cwd=build_temp, check=True)
 
 test_deps = [
     'coverage',
