@@ -1,6 +1,6 @@
 ---
 name: Publish OpenSTL
-on: [push, pull_request]
+on: [pull_request]
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -16,7 +16,11 @@ jobs:
         run: python -m pip install cibuildwheel==2.18.1
       - name: Build wheels
         run: |
-          CMAKE_PATH=$(python -c "import sysconfig, os; print(os.path.join(sysconfig.get_path('scripts'), 'cmake'))")
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            set CMAKE_PATH=$(python -c "import sysconfig, os; print(os.path.join(sysconfig.get_path('scripts'), 'cmake'))")
+          else
+            CMAKE_PATH=$(python -c "import sysconfig, os; print(os.path.join(sysconfig.get_path('scripts'), 'cmake'))")
+          fi
           OPENSTL_CMAKE_PATH=$CMAKE_PATH python -m cibuildwheel --output-dir wheelhouse
       - uses: actions/upload-artifact@v4
         with:
