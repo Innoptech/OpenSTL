@@ -6,7 +6,6 @@ message(STATUS "Adding OpenSTL python binding")
 FIND_PACKAGE(PythonInterp 3)
 FIND_PACKAGE(PythonLibs   3)
 find_package(Python COMPONENTS Interpreter Development)
-find_package(pybind11 CONFIG)
 
 #-------------------------------------------------------------------------------
 # Internal libraries
