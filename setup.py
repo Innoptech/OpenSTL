@@ -2,6 +2,7 @@ import os, re, sys
 import subprocess
 import sysconfig
 from pathlib import Path
+import platform
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
@@ -35,7 +36,12 @@ class CMakeBuild(build_ext):
         ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
         extdir = ext_fullpath.parent.resolve()
 
+        # Detect Python architecture
+        architecture_flag = "-m64" if platform.architecture()[0] == "64bit" else "-m32"
+
         cmake_args = [
+            f"CMAKE_C_FLAGS={architecture_flag}",
+            f"CMAKE_CXX_FLAGS={architecture_flag}",
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DPYTHON_INCLUDE_DIR={sysconfig.get_path('include')}",
