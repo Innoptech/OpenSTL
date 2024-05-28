@@ -37,6 +37,7 @@ jobs:
           pytest
 
   bump_version_and_tag:
+    if: "!startsWith(github.event.head_commit.message, 'bump:')"
     name: Bump version and tag on main
     runs-on: ubuntu-latest
     steps:
@@ -53,13 +54,12 @@ jobs:
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
 
   build_wheels:
+    if: "startsWith(github.event.head_commit.message, 'bump:')"
     name: Build wheels on ${{ matrix.os }}
-    needs:
-      - bump_version_and_tag
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-14]
+        os: [ macos-14]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
