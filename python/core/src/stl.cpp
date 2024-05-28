@@ -73,7 +73,7 @@ namespace pybind11 { namespace detail {
 
         bool load(handle src, bool convert)
         {
-            if ( !convert and !py::array_t<float, py::array::c_style | py::array::forcecast>::check_(src) )
+            if ( (!convert) && (!py::array_t<float, py::array::c_style | py::array::forcecast>::check_(src)) )
                 return false;
 
             auto buf = py::array_t<float, py::array::c_style | py::array::forcecast>::ensure(src);
