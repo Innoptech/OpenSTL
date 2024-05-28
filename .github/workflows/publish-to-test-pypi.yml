@@ -42,7 +42,7 @@ jobs:
     if: "!startsWith(github.event.head_commit.message, 'bump:')"
     name: Bump version and tag on main
     runs-on: ubuntu-latest
-        steps:
+    steps:
       - name: Check out
         uses: actions/checkout@v4
         with:
