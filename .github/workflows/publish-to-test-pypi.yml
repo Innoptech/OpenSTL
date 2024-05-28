@@ -51,11 +51,11 @@ jobs:
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.18.1
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        run: python -m cibuildwheel --output-dir dist
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
+          path: dist/*.whl
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
@@ -70,7 +70,7 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: ./wheelhouse/
+          path: dist/
       - name: Publish distribution 📦 to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -109,7 +109,7 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: ./wheelhouse/
+          path: dist/
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
   github-release:
@@ -125,11 +125,11 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: ./wheelhouse/
+          path: dist/
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v1.2.3
         with:
-          inputs: ./wheelhouse/*.tar.gz ./wheelhouse/*.whl
+          inputs: ./dist/*.tar.gz ./dist/*.whl
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -138,5 +138,5 @@ jobs:
       - name: Upload artifact signatures to GitHub Release
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: gh release upload '${{ github.ref_name }}' ./wheelhouse/** --repo '${{
+        run: gh release upload '${{ github.ref_name }}' dist/** --repo '${{
           github.repository }}'
