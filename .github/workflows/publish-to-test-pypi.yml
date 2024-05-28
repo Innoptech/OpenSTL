@@ -42,18 +42,21 @@ jobs:
     if: "!startsWith(github.event.head_commit.message, 'bump:')"
     name: Bump version and tag on main
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+        steps:
+      - name: Check out
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: "${{ secrets.GITHUB_TOKEN }}"
-      - id: cz
-        name: Create bump and changelog
+      - name: Create bump and changelog
         uses: commitizen-tools/commitizen-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          push: false
       - name: Print Version
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
+      - name: Push using ssh
+        run: |
+          git push origin main --tags
 
   build_wheels:
     if: "startsWith(github.event.head_commit.message, 'bump:')"
