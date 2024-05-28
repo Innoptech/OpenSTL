@@ -48,9 +48,9 @@ class CMakeBuild(build_ext):
 
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
-            f"-DPYTHON3_EXECUTABLE={sys.executable}",
-            f"-DPYTHON3_INCLUDE_DIR={sysconfig.get_path('include')}",
-            f"-DPYTHON3_LIBRARY={sysconfig.get_config_var('LIBDIR')}",
+            f"-DPython3_EXECUTABLE={sys.executable}",
+            f"-DPython3_INCLUDE_DIR={sysconfig.get_path('include')}",
+            f"-DPython3_LIBRARIES={sysconfig.get_config_var('LIBDIR')}",
             "-DCMAKE_BUILD_TYPE=Release",
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
             '-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=ON',
