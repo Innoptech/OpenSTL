@@ -41,7 +41,6 @@ jobs:
     strategy:
       matrix:
         os: [macos-14]
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -51,11 +50,11 @@ jobs:
       - name: Install cibuildwheel
         run: python -m pip install cibuildwheel==2.18.1
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir dist
+        run: python -m cibuildwheel --output-dir wheelhouse
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: dist/*.whl
+          path: ./wheelhouse/*.whl
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
@@ -70,7 +69,9 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
       - name: Publish distribution 📦 to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -109,7 +110,9 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
   github-release:
@@ -125,7 +128,9 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          path: dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v1.2.3
         with:
