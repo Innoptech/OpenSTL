@@ -1,8 +1,6 @@
 import os, re, sys
 import subprocess
-import sysconfig
 from pathlib import Path
-import platform
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
