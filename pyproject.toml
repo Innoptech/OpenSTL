@@ -35,6 +35,8 @@ test-extras = ["test"]
 test-skip = ["*universal2:arm64"]
 # Setuptools bug causes collision between pypy and cpython artifacts
 before-build = "rm -rf {project}/build"
+# Will avoid testing on emulated architectures
+test-skip = "pp*-win_amd64"
 
 [tool.poetry.dependencies]
 pybind11 = "v2.11.1"
