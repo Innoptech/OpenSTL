@@ -1,3 +1,16 @@
+## v1.1.4 (2024-05-28)
+
+### Fix
+
+- sigstore
+
+## v1.1.3 (2024-05-28)
+
+### Fix
+
+- ci activation rules
+- ci activation rules
+
 ## v1.1.2 (2024-05-28)
 
 ### Fix
