@@ -50,7 +50,6 @@ class CMakeBuild(build_ext):
 
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
-            f"-DPython_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",
             "-DCMAKE_BUILD_TYPE=Release",
             '-DCMAKE_INSTALL_RPATH=$ORIGIN',
