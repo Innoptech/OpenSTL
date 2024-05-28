@@ -2,6 +2,8 @@
 name: Publish OpenSTL
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   pull_request:
@@ -61,7 +63,7 @@ jobs:
           git push 
 
   build_wheels:
-    if: "startsWith(github.event.head_commit.message, 'bump:')"
+    if: "github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && startsWith(github.event.head_commit.message, 'bump:')"
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
