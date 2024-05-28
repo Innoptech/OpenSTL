@@ -45,10 +45,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: "${{ secrets.GITHUB_TOKEN }}"
+          ssh-key: "${{ secrets.COMMIT_KEY }}"
       - name: Create bump and changelog
         uses: commitizen-tools/commitizen-action@master
         with:
