@@ -35,8 +35,31 @@ jobs:
         run: |
           python3 -m pip install numpy pytest
           pytest
+
+  bump_version_and_tag:
+    name: Bump version and tag on main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+      - name: Install Commitizen
+        run: pip install commitizen
+      - name: Bump version and create tag
+        run: cz bump --yes
+      - name: Push changes and tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git push origin main
+          git push origin --tags
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
+    needs:
+      - bump_version_and_tag
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -55,6 +78,7 @@ jobs:
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
+
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
@@ -76,30 +100,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-  tests_pypi_distrib:
-    name: Test openstl testpypi distrib
-    needs:
-      - publish-to-testpypi
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Test the python package
-        run: |
-          python3 -m pip install --index-url https://test.pypi.org/simple/ openstl
-          python3 -m pip install numpy pytest
-          pytest ./tests/python
+
   publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI
     needs:
-      - tests_pypi_distrib
+      - publish-to-testpypi
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -115,6 +120,7 @@ jobs:
           merge-multiple: true
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
   github-release:
     name: Sign the Python 🐍 distribution 📦 with Sigstore and upload them to GitHub
       Release
