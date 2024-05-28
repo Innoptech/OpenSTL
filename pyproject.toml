@@ -32,7 +32,7 @@ tag_format = "v$version"
 [tool.cibuildwheel]
 test-command = "pytest {project}/tests"
 test-extras = ["test"]
-test-skip = ["*universal2:arm64", "pp*-win_amd64", "pp*-manylinux*", "cp38-macosx_*:arm64"]
+test-skip = ["*universal2:arm64", "pp*"]
 # Setuptools bug causes collision between pypy and cpython artifacts
 before-build = "rm -rf {project}/build"
 
