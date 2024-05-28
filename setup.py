@@ -67,9 +67,6 @@ class CMakeBuild(build_ext):
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
-        # In this example, we pass in the version to C++. You might not need to.
-        cmake_args += [f"-DEXAMPLE_VERSION_INFO={self.distribution.get_version()}"]
-
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
             # multithreads automatically. MSVC would require all variables be
@@ -128,11 +125,6 @@ class CMakeBuild(build_ext):
             build_temp.mkdir(parents=True)
 
         subprocess.run([ext.cmake, ext.sourcedir] + cmake_args, cwd=build_temp, check=True)
-
-        build_args = []
-        if "CMAKE_BUILD_PARALLEL_LEVEL" not in os.environ:
-            if hasattr(self, "parallel") and self.parallel:
-                build_args += [f"-j{self.parallel}"]
         subprocess.run([ext.cmake, "--build", "."] + build_args, cwd=build_temp, check=True)
 
 test_deps = [
