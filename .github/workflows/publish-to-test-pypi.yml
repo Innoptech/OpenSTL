@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    if: github.event_name == 'pull_request' && github.ref == 'refs/heads/main'
+    if: "github.event_name == 'pull_request'"
     name: Build and Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,8 +39,7 @@ jobs:
           pytest
 
   bump_version_and_tag:
-    if: "!startsWith(github.event.head_commit.message, 'bump:')"
-    #if: "github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'bump:')"
+    if: "github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'bump:')"
     name: Bump version and tag on main
     runs-on: ubuntu-latest
     steps:
@@ -56,11 +55,12 @@ jobs:
       - name: Print Version
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
       - name: Push using ssh
-        #if: github.event_name == 'push'
+        if: github.event_name == 'push'
         run: |
           git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
           git config --global user.email "ruelj2@users.noreply.github.com"
           git push --tags
+          git push 
 
   build_wheels:
     if: "startsWith(github.event.head_commit.message, 'bump:')"
@@ -68,8 +68,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-14]
-        #os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
