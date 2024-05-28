@@ -3,8 +3,6 @@ message(STATUS "Adding OpenSTL python binding")
 #-------------------------------------------------------------------------------
 # External libraries
 #-------------------------------------------------------------------------------
-FIND_PACKAGE(PythonInterp 3)
-FIND_PACKAGE(PythonLibs   3)
 find_package(Python3 COMPONENTS Interpreter Development)
 
 #-------------------------------------------------------------------------------
@@ -17,15 +15,12 @@ endif()
 #-------------------------------------------------------------------------------
 # Build Python Binding
 #-------------------------------------------------------------------------------
-if(NOT PYTHONINTERP_FOUND)
-    message( FATAL_ERROR "PYTHONINTERP could not be found")
-endif()
-if(NOT PYTHONLIBS_FOUND)
-    message( FATAL_ERROR "PYTHONLIBS could not be found")
+if(NOT PYTHON3_FOUND)
+    message( FATAL_ERROR "PYTHON3 could not be found")
 endif()
 
 
-IF(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
+IF(PYTHON3_FOUND)
     file(GLOB_RECURSE python_SRC core/*.cpp)
     pybind11_add_module(openstl MODULE ${python_SRC})
     target_include_directories(openstl PRIVATE ${PYBIND11_SUBMODULE}/include)
