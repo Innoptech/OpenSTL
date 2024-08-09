@@ -89,16 +89,18 @@ namespace openstl
     void serializeBinaryStl(const Container& triangles, Stream& stream) {
         // Write header (80 bytes for comments)
         char header[80] = "STL Exported by OpenSTL [https://github.com/Innoptech/OpenSTL]";
-        stream.write(header, 80);
+        stream.write(header, sizeof(header));
 
         // Write triangle count (4 bytes)
         auto triangleCount = static_cast<uint32_t>(triangles.size());
-        stream.write((const char*)&triangleCount, sizeof(triangleCount));
+        stream.write(reinterpret_cast<const char*>(&triangleCount), sizeof(triangleCount));
 
         // Write triangles
-        for (const auto& tri : triangles)
-            stream.write((const char*)&tri, sizeof(Triangle));
+        for (const auto& tri : triangles) {
+            stream.write(reinterpret_cast<const char*>(&tri), sizeof(Triangle));
+        }
     }
+
 
     /**
      * @brief Serialize a vector of triangles in the specified STL format and write to a stream.
@@ -171,7 +173,6 @@ namespace openstl
                 triangles.push_back(tri);
             }
         }
-
         return triangles;
     }
 
@@ -183,16 +184,56 @@ namespace openstl
      * @return A vector of triangles representing the geometry from the binary STL file.
      */
     template <typename Stream>
-    inline std::vector<Triangle> deserializeBinaryStl(Stream& stream)
-    {
-        // Read header
-        stream.ignore(80); // Ignore the header
+    std::vector<Triangle> deserializeBinaryStl(Stream& stream) {
+        // Get the current position and determine the file size
+        auto start_pos = stream.tellg();
+        stream.seekg(0, std::ios::end);
+        auto end_pos = stream.tellg();
+        stream.seekg(start_pos);
+
+        // Ensure the file is large enough for the header and triangle count
+        if (end_pos - start_pos < 84) {
+            throw std::runtime_error("File is too small to be a valid STL file.");
+        }
+
+        // Explicitly read the header (80 bytes)
+        char header[80];
+        stream.read(header, sizeof(header));
+
+        if (stream.gcount() != sizeof(header)) {
+            throw std::runtime_error("Failed to read the full header. Possible corruption or incomplete file.");
+        }
+
+        // Read and validate triangle count (4 bytes)
         uint32_t triangle_qty;
-        stream.read((char*)&triangle_qty, sizeof(triangle_qty));
+        stream.read(reinterpret_cast<char*>(&triangle_qty), sizeof(triangle_qty));
+
+        if (stream.gcount() != sizeof(triangle_qty) || stream.fail() || stream.eof()) {
+            throw std::runtime_error("Failed to read the triangle count. Possible corruption or incomplete file.");
+        }
+
+        // Validate triangle count
+        const uint32_t MAX_TRIANGLES = 1000000;
+        if (triangle_qty > MAX_TRIANGLES) {
+            throw std::runtime_error("Triangle count exceeds the maximum allowable value.");
+        }
+
+        // Calculate the expected size of the triangle data
+        std::size_t expected_data_size = sizeof(Triangle) * triangle_qty;
+
+        // Ensure the stream has enough data left
+        if (end_pos - stream.tellg() < static_cast<std::streamoff>(expected_data_size)) {
+            throw std::runtime_error("Not enough data in stream for the expected triangle count.");
+        }
 
         // Read triangles
         std::vector<Triangle> triangles(triangle_qty);
-        stream.read((char*)triangles.data(), sizeof(Triangle)*triangle_qty);
+        stream.read(reinterpret_cast<char*>(triangles.data()), expected_data_size);
+
+        if (stream.gcount() != expected_data_size || stream.fail() || stream.eof()) {
+            throw std::runtime_error("Failed to read the expected number of triangles. Possible corruption or incomplete file.");
+        }
+
         return triangles;
     }
 

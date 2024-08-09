@@ -117,5 +117,107 @@ TEST_CASE("Deserialize Binary STL", "[openstl]") {
     }
 }
 
+TEST_CASE("Binary STL Serialization/Deserialization Security and Integrity Tests",
+          "[openstl][security][stl][serialization][deserialization][security]")
+{
+    SECTION("Incomplete triangle data - incomplete_triangle_data.stl") {
+        const std::vector<Triangle> &triangles = testutils::createTestTriangle();
+        const std::string filename{"incomplete_triangle_data.stl"};
+        testutils::createIncompleteTriangleData(triangles, filename);
 
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization with corrupted header (invalid characters)") {
+        const std::vector<Triangle>& triangles = testutils::createTestTriangle();
+        const std::string filename = "corrupted_header.stl";
+        testutils::createCorruptedHeaderInvalidChars(triangles, filename);  // Generate the file with invalid characters in the header
 
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+
+        std::vector<Triangle> deserialized_triangles;
+        CHECK_NOTHROW(deserialized_triangles = deserializeBinaryStl(file));
+        REQUIRE(testutils::checkTrianglesEqual(deserialized_triangles, triangles));
+    }
+    SECTION("Test deserialization with corrupted header (excess data after header)") {
+        const std::vector<Triangle> &triangles = testutils::createTestTriangle();
+        const std::string filename{"excess_data_after_header.stl"};
+        testutils::createCorruptedHeaderExcessData(triangles,
+                                                   filename);  // Generate the file with excess data after the header
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization with excessive triangle count") {
+        const std::vector<Triangle> &triangles = testutils::createTestTriangle();
+        const std::string filename{"excessive_triangle_count.stl"};
+        testutils::createExcessiveTriangleCount(triangles,filename);  // Generate the file with an excessive triangle count
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization with the maximum number of triangles") {
+        const uint32_t MAX_TRIANGLES = 1000000;
+        const std::string filename = "max_triangles.stl";
+
+        // Create a file with exactly MAX_TRIANGLES triangles
+        std::vector<Triangle> triangles(MAX_TRIANGLES);
+        testutils::createStlWithTriangles(triangles, filename);
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+
+        // Test that deserialization works correctly for MAX_TRIANGLES
+        std::vector<Triangle> deserialized_triangles;
+        CHECK_NOTHROW(deserialized_triangles = deserializeBinaryStl(file));
+        REQUIRE(deserialized_triangles.size() == MAX_TRIANGLES);
+    }
+    SECTION("Test deserialization exceeding the maximum number of triangles") {
+        const uint32_t EXCEEDING_TRIANGLES = 1'000'001;
+        const std::string filename = "exceeding_triangles.stl";
+
+        // Create a file with more than MAX_TRIANGLES triangles
+        std::vector<Triangle> triangles(EXCEEDING_TRIANGLES);
+        testutils::createStlWithTriangles(triangles, filename);
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+
+        // Test that deserialization throws an exception for exceeding MAX_TRIANGLES
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization with an empty file") {
+        const std::string filename{"empty_triangles.stl"};
+        testutils::createEmptyStlFile(filename);  // Generate an empty file
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Buffer overflow on triangle count - buffer_overflow_triangle_count.stl") {
+        std::string filename = "buffer_overflow_triangle_count.stl";
+        testutils::createBufferOverflowOnTriangleCount(filename);
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+        CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization with corrupted header (invalid characters) - corrupted_header_invalid_chars.stl") {
+        const std::vector<Triangle>& triangles = testutils::createTestTriangle();
+        const std::string filename = "corrupted_header_invalid_chars.stl";
+        testutils::createCorruptedHeaderInvalidChars(triangles, filename);  // Generate the file with invalid characters in the header
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+
+        // Deserialize the STL file, ignoring the header content
+        auto deserialized_triangles = deserializeBinaryStl(file);
+
+        // Check that the deserialized triangles match the expected count and data
+        testutils::checkTrianglesEqual(deserialized_triangles, triangles);
+    }
+}

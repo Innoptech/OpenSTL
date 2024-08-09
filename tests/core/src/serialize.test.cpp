@@ -1,28 +1,9 @@
 #include <catch2/catch_test_macros.hpp>
+#include "openstl/tests/testutils.h"
 #include "openstl/core/stl.h"
 
 using namespace openstl;
 
-
-// Custom equality operator for Vertex struct
-bool operator!=(const Vec3& rhs, const Vec3& lhs) {
-    return std::tie(rhs.x, rhs.y, rhs.z) != std::tie(lhs.x, lhs.y, lhs.z);
-}
-
-// Utility function to compare two vectors of triangles
-bool compareTriangles(const std::vector<Triangle>& a, const std::vector<Triangle>& b, bool omit_attribute=false) {
-    if (a.size() != b.size()) return false;
-    for (size_t i = 0; i < a.size(); ++i) {
-        if (a[i].normal != b[i].normal ||
-            a[i].v0 != b[i].v0 ||
-            a[i].v1 != b[i].v1 ||
-            a[i].v2 != b[i].v2 ||
-            ((a[i].attribute_byte_count != b[i].attribute_byte_count) & !omit_attribute)) {
-            return false;
-        }
-    }
-    return true;
-}
 
 TEST_CASE("Serialize STL triangles", "[openstl]") {
     // Generate some sample triangles
@@ -51,7 +32,7 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         auto deserializedTriangles = deserializeBinaryStl(inFile);
 
         // Validate deserialized triangles against original triangles
-        REQUIRE(compareTriangles(deserializedTriangles, originalTriangles));
+        REQUIRE(testutils::checkTrianglesEqual(deserializedTriangles, originalTriangles));
     }
 
     SECTION("Binary Format stringstream") {
@@ -65,7 +46,7 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         auto deserializedTriangles = deserializeBinaryStl(ss);
 
         // Validate deserialized triangles against original triangles
-        REQUIRE(compareTriangles(deserializedTriangles, originalTriangles));
+        REQUIRE(testutils::checkTrianglesEqual(deserializedTriangles, originalTriangles));
     }
 
     SECTION("ASCII Format") {
@@ -88,6 +69,6 @@ TEST_CASE("Serialize STL triangles", "[openstl]") {
         auto deserializedTriangles = deserializeAsciiStl(inFile);
 
         // Validate deserialized triangles against original triangles
-        REQUIRE(compareTriangles(deserializedTriangles, originalTriangles, true));
+        REQUIRE(testutils::checkTrianglesEqual(deserializedTriangles, originalTriangles, true));
     }
 }
