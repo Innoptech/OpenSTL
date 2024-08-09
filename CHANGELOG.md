@@ -1,3 +1,9 @@
+## v1.2.0 (2024-08-09)
+
+### Feat
+
+- Add validation for truncated headers in STL deserialization
+
 ## v1.1.6 (2024-05-28)
 
 ### Fix
