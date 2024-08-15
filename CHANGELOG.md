@@ -1,3 +1,15 @@
+## v1.2.2 (2024-08-09)
+
+### Fix
+
+- put back cp39-win32 in ci build
+
+## v1.2.1 (2024-08-09)
+
+### Fix
+
+- update README.md
+
 ## v1.2.0 (2024-08-09)
 
 ### Feat
