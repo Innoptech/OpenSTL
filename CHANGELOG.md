@@ -1,3 +1,10 @@
+## v1.2.5 (2024-08-15)
+
+### Fix
+
+- upgrade cibuildwheel and trigger build
+- avoid messing with rpath
+
 ## v1.2.4 (2024-08-15)
 
 ### Fix
