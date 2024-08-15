@@ -1,3 +1,9 @@
+## v1.2.6 (2024-08-15)
+
+### Fix
+
+- avoid cp313-win32 and trigger build
+
 ## v1.2.5 (2024-08-15)
 
 ### Fix
