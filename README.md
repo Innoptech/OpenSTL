@@ -213,7 +213,6 @@ C++11 or higher.
 
 # DISCLAIMER: STL File Format #
 
-
 The STL file format, while widely used for 3D modeling and printing, was designed to be simple and easy to parse. However, this simplicity comes with some significant limitations:
 
 - Lack of Built-in Validation Mechanisms: The STL format does not include built-in mechanisms such as checksums, hashes, or any form of file validation. This makes it challenging to detect certain types of file corruption, such as a truncated header or malformed data. As a result, errors in file transmission, storage, or manipulation might go undetected.
