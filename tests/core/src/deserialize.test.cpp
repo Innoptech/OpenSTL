@@ -161,7 +161,6 @@ TEST_CASE("Binary STL Serialization/Deserialization Security and Integrity Tests
         CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
     }
     SECTION("Test deserialization with the maximum number of triangles") {
-        const uint32_t MAX_TRIANGLES = 1000000;
         const std::string filename = "max_triangles.stl";
 
         // Create a file with exactly MAX_TRIANGLES triangles
@@ -177,11 +176,10 @@ TEST_CASE("Binary STL Serialization/Deserialization Security and Integrity Tests
         REQUIRE(deserialized_triangles.size() == MAX_TRIANGLES);
     }
     SECTION("Test deserialization exceeding the maximum number of triangles") {
-        const uint32_t EXCEEDING_TRIANGLES = 1'000'001;
         const std::string filename = "exceeding_triangles.stl";
 
         // Create a file with more than MAX_TRIANGLES triangles
-        std::vector<Triangle> triangles(EXCEEDING_TRIANGLES);
+        std::vector<Triangle> triangles(MAX_TRIANGLES+1);
         testutils::createStlWithTriangles(triangles, filename);
 
         std::ifstream file(filename, std::ios::binary);
@@ -189,6 +187,20 @@ TEST_CASE("Binary STL Serialization/Deserialization Security and Integrity Tests
 
         // Test that deserialization throws an exception for exceeding MAX_TRIANGLES
         CHECK_THROWS_AS(deserializeBinaryStl(file), std::runtime_error);
+    }
+    SECTION("Test deserialization exceeding the maximum number of triangles with deactivated safety") {
+        const std::string filename = "exceeding_triangles.stl";
+
+        // Create a file with more than MAX_TRIANGLES triangles
+        std::vector<Triangle> triangles(MAX_TRIANGLES+1);
+        testutils::createStlWithTriangles(triangles, filename);
+
+        std::ifstream file(filename, std::ios::binary);
+        REQUIRE(file.is_open());
+
+        // Deactivate buffer overflow safety
+        activateOverflowSafety() = false;
+        CHECK_NOTHROW(deserializeBinaryStl(file));
     }
     SECTION("Test deserialization with an empty file") {
         const std::string filename{"empty_triangles.stl"};
