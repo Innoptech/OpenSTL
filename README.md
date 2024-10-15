@@ -17,12 +17,23 @@ Discover the staggering performance of OpenSTL in comparison to [numpy-stl](http
  [meshio](https://github.com/nschloe/meshio) and [stl-reader](https://github.com/pyvista/stl-reader), thanks to its powerful C++ backend.
 See [benchmark.py](benchmark/benchmark.py). Benchmark performed on an Intel i5-9600KF CPU @ 3.70GHz.
 
-    Performance gains over numpy-stl, meshio and stl-reader
-    Write:  1.3 to 4+ X faster
-    Read:   1 to 2.3+ X faster
-    Rotate: 1 to 12+  X faster
-Note: meshio has no straightfoward way of rotating vertices, so it was not benchmarked. 
 ![Benchmark Results](benchmark/benchmark.png)
+
+    Performance gains over numpy-stl, meshio and stl-reader
+    #openstl vs numpy-stl  
+    Write:	OpenSTL is 1.262 to 5.998 X faster than numpy-stl
+    Read:	OpenSTL is 2.131 to 11.144 X faster than numpy-stl
+    Rotate:	OpenSTL is 0.971 to 13.873 X faster than numpy-stl
+    Rotate:	OpenSTL + PyTorch is 0.022 to 100.25 X faster than numpy-stl
+
+    #openstl  vs meshio  
+    Write:	OpenSTL is 4.289 to 80.714 X faster than meshio
+    Read:	OpenSTL is 15.915 to 311.365 X faster than meshio
+
+    #openstl vs stl_reader  
+    Read:	OpenSTL is 0.719 to 2.2 X faster than stl_reader
+
+Note: meshio has no specific way of rotating vertices, so it was not benchmarked. 
 
 # Python Usage
 ### Install
