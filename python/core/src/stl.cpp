@@ -104,8 +104,19 @@ namespace pybind11 { namespace detail {
 }} // namespace pybind11::detail
 
 
-
 void serialize(py::module_ &m) {
+    // Define getter and setter for the activateOverflowSafety option
+    m.def("get_activate_overflow_safety", []() {
+        return activateOverflowSafety();
+    });
+
+    m.def("set_activate_overflow_safety", [](bool value) {
+        if (!value) {
+            py::print("Warning: Deactivating overflow safety may expose the application to potential buffer overflow risks.",
+                      py::module_::import("sys").attr("stderr"));
+        }
+        activateOverflowSafety() = value;
+    });
 
     py::enum_<StlFormat>(m, "format")
             .value("ascii", StlFormat::ASCII)

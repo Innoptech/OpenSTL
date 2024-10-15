@@ -1,3 +1,58 @@
+## v1.2.9 (2024-10-15)
+
+### Fix
+
+- add a activateOverflowSafety to activate/deactivate buffer overflow safety.
+
+## v1.2.8 (2024-08-15)
+
+### Fix
+
+- remove build for cp313
+
+## v1.2.7 (2024-08-15)
+
+### Fix
+
+- OPENBLAS_NUM_THREADS=1 to fix numpy on python 3.13
+
+## v1.2.6 (2024-08-15)
+
+### Fix
+
+- avoid cp313-win32 and trigger build
+
+## v1.2.5 (2024-08-15)
+
+### Fix
+
+- upgrade cibuildwheel and trigger build
+- avoid messing with rpath
+
+## v1.2.4 (2024-08-15)
+
+### Fix
+
+- avoid messing with rpath
+
+## v1.2.3 (2024-08-15)
+
+### Fix
+
+- trigger a release
+
+## v1.2.2 (2024-08-09)
+
+### Fix
+
+- put back cp39-win32 in ci build
+
+## v1.2.1 (2024-08-09)
+
+### Fix
+
+- update README.md
+
 ## v1.2.0 (2024-08-09)
 
 ### Feat
