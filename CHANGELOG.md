@@ -1,3 +1,9 @@
+## v1.2.9 (2024-10-15)
+
+### Fix
+
+- add a activateOverflowSafety to activate/deactivate buffer overflow safety.
+
 ## v1.2.8 (2024-08-15)
 
 ### Fix
