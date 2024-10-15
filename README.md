@@ -124,8 +124,32 @@ faces = [
 triangles = openstl.convert.triangles(vertices, faces)
 ``` 
 
+### Use with `Pytorch`
+```python
+import openstl
+import torch
+
+quad = torch.Tensor(openstl.read("quad.stl")).to('cuda')
+
+# Rotating
+rotation_matrix = torch.Tensor([
+    [0,-1, 0],
+    [1, 0, 0],
+    [0, 0, 1]
+]).to('cuda')
+rotated_quad = torch.matmul(rotation_matrix, quad.reshape(-1,3).T).T.reshape(-1,4,3)
+
+# Translating
+translation_vector = torch.Tensor([1,1,1]).to('cuda')
+quad[:,1:4,:] += translation_vector # Avoid translating normals
+
+# Scaling
+scale = 1000.0
+quad[:,1:4,:] *= scale # Avoid scaling normals
+```
+
 ### Read large STL file 
-To read large STL file with a trianlge count > **1 000 000**, the openstl buffer overflow safety must be unactivated with
+To read large STL file with a large triangle count > **1 000 000**, the openstl buffer overflow safety must be unactivated with
 `openstl.set_activate_overflow_safety(False)` after import. Deactivating overflow safety may expose the application 
 to potential buffer overflow risks (if openstl is used in a backend server with sensible data for example).
 
