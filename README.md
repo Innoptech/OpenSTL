@@ -113,6 +113,11 @@ faces = [
 triangles = openstl.convert.triangles(vertices, faces)
 ``` 
 
+### Read large STL file 
+To read large STL file with a trianlge count > **1 000 000**, the openstl buffer overflow safety must be unactivated with
+`openstl.set_activate_overflow_safety(False)` after import. Deactivating overflow safety may expose the application 
+to potential buffer overflow risks (if openstl is used in a backend server with sensible data for example).
+
 # C++ Usage
 ### Read STL from file
 ```c++

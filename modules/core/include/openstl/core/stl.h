@@ -34,6 +34,8 @@ SOFTWARE.
 #include <cmath>
 #include <algorithm>
 
+#define MAX_TRIANGLES 1000000
+
 namespace openstl
 {
 // Disable padding for the structure
@@ -127,6 +129,15 @@ namespace openstl
     //---------------------------------------------------------------------------------------------------------
 
     /**
+     * A library-level configuration to activate/deactivate the buffer overflow safety
+     * @return
+     */
+    bool& activateOverflowSafety() {
+        static bool safety_enabled = true;
+        return safety_enabled;
+    }
+
+    /**
      * @brief Read a vertex from a stream.
      *
      * @tparam Stream The type of the input stream.
@@ -172,6 +183,9 @@ namespace openstl
                 readVertex(stream, tri.v2);
                 triangles.push_back(tri);
             }
+            if (activateOverflowSafety() && triangles.size() > MAX_TRIANGLES) {
+                throw std::runtime_error("Triangle count exceeds the maximum allowable value.");
+            }
         }
         return triangles;
     }
@@ -185,18 +199,15 @@ namespace openstl
      */
     template <typename Stream>
     std::vector<Triangle> deserializeBinaryStl(Stream& stream) {
-        // Get the current position and determine the file size
         auto start_pos = stream.tellg();
         stream.seekg(0, std::ios::end);
         auto end_pos = stream.tellg();
         stream.seekg(start_pos);
 
-        // Ensure the file is large enough for the header and triangle count
         if (end_pos - start_pos < 84) {
             throw std::runtime_error("File is too small to be a valid STL file.");
         }
 
-        // Explicitly read the header (80 bytes)
         char header[80];
         stream.read(header, sizeof(header));
 
@@ -204,7 +215,6 @@ namespace openstl
             throw std::runtime_error("Failed to read the full header. Possible corruption or incomplete file.");
         }
 
-        // Read and validate triangle count (4 bytes)
         uint32_t triangle_qty;
         stream.read(reinterpret_cast<char*>(&triangle_qty), sizeof(triangle_qty));
 
@@ -212,21 +222,17 @@ namespace openstl
             throw std::runtime_error("Failed to read the triangle count. Possible corruption or incomplete file.");
         }
 
-        // Validate triangle count
-        const uint32_t MAX_TRIANGLES = 1000000;
-        if (triangle_qty > MAX_TRIANGLES) {
+        // Apply the triangle count limit only if activateOverflowSafety is true
+        if (activateOverflowSafety() && triangle_qty > MAX_TRIANGLES) {
             throw std::runtime_error("Triangle count exceeds the maximum allowable value.");
         }
 
-        // Calculate the expected size of the triangle data
         std::size_t expected_data_size = sizeof(Triangle) * triangle_qty;
 
-        // Ensure the stream has enough data left
         if (end_pos - stream.tellg() < static_cast<std::streamoff>(expected_data_size)) {
             throw std::runtime_error("Not enough data in stream for the expected triangle count.");
         }
 
-        // Read triangles
         std::vector<Triangle> triangles(triangle_qty);
         stream.read(reinterpret_cast<char*>(triangles.data()), expected_data_size);
 
