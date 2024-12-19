@@ -33,6 +33,7 @@ SOFTWARE.
 #include <tuple>
 #include <cmath>
 #include <algorithm>
+#include <array>
 
 #define MAX_TRIANGLES 1000000
 
