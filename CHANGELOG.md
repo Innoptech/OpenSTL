@@ -1,3 +1,9 @@
+## v1.2.10 (2024-12-19)
+
+### Fix
+
+- #include <array> to fix issue #19 on windows
+
 ## v1.2.9 (2024-10-15)
 
 ### Fix
