@@ -12,6 +12,40 @@ The fastest and most intuitive library to manipulate STL files (stereolithograph
  🌟 :fist_raised: Please consider starring and sponsoring the GitHub repo to show your support! :fist_raised: 🌟   
 ![GitHub Sponsor](https://img.shields.io/github/sponsors/Innoptech?label=Sponsor&logo=GitHub)
 
+## Index
+1. **Performance**
+ - [Performance Benchmark](#performances-benchmark)
+
+2. **Python Usage**
+ - [Install](#install)
+ - [Read and Write STL Files](#read-and-write-from-a-stl-file)
+ - [Rotate, Translate, and Scale Meshes](#rotate-translate-and-scale-a-mesh)
+ - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces)
+ - [Find Connected Components](#find-connected-components-in-mesh-topology-disjoint-solids)
+ - [Use with PyTorch](#use-with-pytorch)
+ - [Handling Large STL Files](#read-large-stl-file)
+
+3. **C++ Usage**
+ - [Read STL from File](#read-stl-from-file)
+ - [Write STL to File](#write-stl-to-a-file)
+ - [Serialize STL to Stream](#serialize-stl-to-a-stream)
+ - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces-1)
+ - [Find Connected Components](#find-connected-components-in-mesh-topology)
+
+4. **C++ Integration**
+ - [Smart Method with CMake](#smart-method)
+ - [Naïve Method](#naïve-method)
+
+5. **Testing**
+ - [Run Tests](#test)
+
+6. **Requirements**
+ - [C++ Standards](#requirements)
+
+7. **Disclaimer**
+ - [STL File Format Limitations](#disclaimer-stl-file-format)
+
+
 # Performances benchmark
 Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl),
  [meshio](https://github.com/nschloe/meshio) and [stl-reader](https://github.com/pyvista/stl-reader), thanks to its powerful C++ backend.
@@ -124,6 +158,35 @@ faces = [
 triangles = openstl.convert.triangles(vertices, faces)
 ``` 
 
+### Find Connected Components in Mesh Topology (Disjoint solids)
+```python
+import openstl
+
+# Define vertices and faces for two disconnected components
+vertices = [
+ [0.0, 0.0, 0.0],
+ [1.0, 0.0, 0.0],
+ [0.0, 1.0, 0.0],
+ [2.0, 2.0, 0.0],
+ [3.0, 2.0, 0.0],
+ [2.5, 3.0, 0.0],
+]
+
+faces = [
+ [0, 1, 2],  # Component 1
+ [3, 4, 5],  # Component 2
+]
+
+# Identify connected components of faces
+connected_components = openstl.topology.find_connected_components(vertices, faces)
+
+# Print the result
+print(f"Number of connected components: {len(connected_components)}")
+for i, component in enumerate(connected_components):
+ print(f"Component {i + 1}: {component}")
+```
+
+
 ### Use with `Pytorch`
 ```python
 import openstl
@@ -148,7 +211,7 @@ scale = 1000.0
 quad[:,1:4,:] *= scale # Avoid scaling normals
 ```
 
-### Read large STL file 
+### Read large STL file
 To read STL file with a large triangle count > **1 000 000**, the openstl buffer overflow safety must be unactivated with
 `openstl.set_activate_overflow_safety(False)` after import. Deactivating overflow safety may expose the application 
 to a potential buffer overflow attack vector since the stl standard is not backed by a checksum.
@@ -223,7 +286,40 @@ std::vector<Face> faces = {
 const auto& triangles = convertToTriangles(vertices, faces);
 ```
 
-# Integrate to your codebase
+### Find Connected Components in Mesh Topology
+```c++
+#include <openstl/topology.hpp>
+#include <vector>
+#include <iostream>
+
+using namespace openstl;
+
+int main() {
+    std::vector<Vec3> vertices = {
+        {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f},  // Component 1
+        {2.0f, 2.0f, 0.0f}, {3.0f, 2.0f, 0.0f}, {2.5f, 3.0f, 0.0f}   // Component 2
+    };
+
+    std::vector<Face> faces = {
+        {0, 1, 2},  // Component 1
+        {3, 4, 5},  // Component 2
+    };
+
+    const auto& connected_components = findConnectedComponents(vertices, faces);
+
+    std::cout << "Number of connected components: " << connected_components.size() << "\\n";
+    for (size_t i = 0; i < connected_components.size(); ++i) {
+        std::cout << "Component " << i + 1 << ":\\n";
+        for (const auto& face : connected_components[i]) {
+            std::cout << "  {" << face[0] << ", " << face[1] << ", " << face[2] << "}\\n";
+        }
+    }
+
+    return 0;
+}
+```
+****
+# Integrate to your C++ codebase
 ### Smart method
 Include this repository with CMAKE Fetchcontent and link your executable/library to `openstl::core` library.   
 Choose weither you want to fetch a specific branch or tag using `GIT_TAG`. Use the `main` branch to keep updated with the latest improvements.
@@ -250,7 +346,7 @@ ctest .
 ```
 
 # Requirements
-C++11 or higher.
+C++17 or higher.
 
 
 # DISCLAIMER: STL File Format #
