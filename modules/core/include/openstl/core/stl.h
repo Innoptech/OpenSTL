@@ -133,7 +133,7 @@ namespace openstl
      * A library-level configuration to activate/deactivate the buffer overflow safety
      * @return
      */
-    bool& activateOverflowSafety() {
+    inline bool& activateOverflowSafety() {
         static bool safety_enabled = true;
         return safety_enabled;
     }
@@ -284,7 +284,7 @@ namespace openstl
     }
 
     //---------------------------------------------------------------------------------------------------------
-    // Transformation Utils
+    // Conversion Utils
     //---------------------------------------------------------------------------------------------------------
     using Face = std::array<size_t, 3>; // v0, v1, v2
 
@@ -389,5 +389,73 @@ namespace openstl
         }
         return triangles;
     }
+
+    //---------------------------------------------------------------------------------------------------------
+    // Topology Utils
+    //---------------------------------------------------------------------------------------------------------
+    /**
+     * DisjointSet class to manage disjoint sets with union-find.
+     */
+    class DisjointSet {
+        std::vector<size_t> parent;
+        std::vector<size_t> rank;
+
+    public:
+        explicit DisjointSet(size_t size) : parent(size), rank(size, 0) {
+            for (size_t i = 0; i < size; ++i) parent[i] = i;
+        }
+
+        size_t find(size_t x) {
+            if (parent[x] != x) parent[x] = find(parent[x]);
+            return parent[x];
+        }
+
+        void unite(size_t x, size_t y) {
+            size_t rootX = find(x), rootY = find(y);
+            if (rootX != rootY) {
+                if (rank[rootX] < rank[rootY]) parent[rootX] = rootY;
+                else if (rank[rootX] > rank[rootY]) parent[rootY] = rootX;
+                else {
+                    parent[rootY] = rootX;
+                    ++rank[rootX];
+                }
+            }
+        }
+
+        bool connected(size_t x, size_t y) {
+            return find(x) == find(y);
+        }
+    };
+
+    /**
+     * Identifies and groups connected components of faces based on shared vertices.
+     *
+     * @param vertices A container of vertices.
+     * @param faces A container of faces, where each face is a collection of vertex indices.
+     * @return A vector of connected components, where each component is a vector of faces.
+     */
+    template<typename ContainerA, typename ContainerB>
+    inline std::vector<std::vector<Face>>
+    findConnectedComponents(const ContainerA& vertices, const ContainerB& faces) {
+        DisjointSet ds{vertices.size()};
+        for (const auto& tri : faces) {
+            ds.unite(tri[0], tri[1]);
+            ds.unite(tri[0], tri[2]);
+        }
+
+        std::vector<std::vector<Face>> result;
+        std::unordered_map<size_t, size_t> rootToIndex;
+
+        for (const auto& tri : faces) {
+            size_t root = ds.find(tri[0]);
+            if (rootToIndex.find(root) == rootToIndex.end()) {
+                rootToIndex[root] = result.size();
+                result.emplace_back();
+            }
+            result[rootToIndex[root]].push_back(tri);
+        }
+        return result;
+    }
+
 } //namespace openstl
 #endif //OPENSTL_OPENSTL_SERIALIZE_H

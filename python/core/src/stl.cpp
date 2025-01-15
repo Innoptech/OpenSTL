@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <pybind11/iostream.h>
 #include <memory>
@@ -241,9 +242,47 @@ void convertSubmodule(py::module_ &_m)
     }, "vertices"_a,"faces"_a, "Convert the mesh from vertices and faces to triangles");
 }
 
+void topologySubmodule(py::module_ &_m)
+{
+    auto m = _m.def_submodule("topology", "A submodule for analyzing and segmenting connected components in mesh topology.");
+
+    m.def("find_connected_components", [](
+            const py::array_t<float, py::array::c_style | py::array::forcecast> &vertices,
+            const py::array_t<size_t, py::array::c_style | py::array::forcecast> &faces
+    ) -> std::vector<std::vector<Face>>
+    {
+        py::scoped_ostream_redirect stream(std::cerr,py::module_::import("sys").attr("stderr"));
+        auto vbuf = py::array_t<float, py::array::c_style | py::array::forcecast>::ensure(vertices);
+        if(!vbuf){
+            std::cerr << "Vertices input array cannot be interpreted as a mesh.\n";
+            return {};
+        }
+        if (vbuf.ndim() != 2 || vbuf.shape(1) != 3){
+            std::cerr << "Vertices input array cannot be interpreted as a mesh. Shape must be N x 3.\n";
+            return {};
+        }
+
+        auto fbuf = py::array_t<size_t , py::array::c_style | py::array::forcecast>::ensure(faces);
+        if(!fbuf){
+            std::cerr << "Faces input array cannot be interpreted as a mesh.\n";
+            return {};
+        }
+        if (fbuf.ndim() != 2 || vbuf.shape(1) != 3){
+            std::cerr << "Faces input array cannot be interpreted as a mesh.\n";
+            std::cerr << "Shape must be N x 3 (v0, v1, v2).\n";
+            return {};
+        }
+
+        StridedSpan<Vec3,3, float> verticesIter{vbuf.data(), (size_t)vbuf.shape(0)};
+        StridedSpan<Face,3,size_t> facesIter{fbuf.data(), (size_t)fbuf.shape(0)};
+        return findConnectedComponents(verticesIter, facesIter);
+    }, "vertices"_a,"faces"_a, "Convert the mesh from vertices and faces to triangles");
+}
+
 PYBIND11_MODULE(openstl, m) {
     serialize(m);
     convertSubmodule(m);
+    topologySubmodule(m);
     m.attr("__version__") = OPENSTL_PROJECT_VER;
     m.doc() = "A simple STL serializer and deserializer";
 
