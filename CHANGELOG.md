@@ -1,3 +1,9 @@
+## v2.0.0 (2025-01-15)
+
+### Feat
+
+- introduce connected components to find disjoint meshes (solids)
+
 ## v1.2.10 (2024-12-19)
 
 ### Fix
