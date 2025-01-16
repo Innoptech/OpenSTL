@@ -279,30 +279,20 @@ const auto& triangles = convertToTriangles(vertices, faces);
 
 ### Find Connected Components in Mesh Topology
 ```c++
-#include <openstl/topology.hpp>
-#include <vector>
-#include <iostream>
-
 using namespace openstl;
 
-int main() {
-    // ...
+// Convert to vertices and faces
+const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
 
-    // Convert to vertices and faces
-    const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
+// Find connected components
+const auto& connected_components = findConnectedComponents(vertices, faces);
 
-    // Find connected components
-    const auto& connected_components = findConnectedComponents(vertices, faces);
-
-    std::cout << "Number of connected components: " << connected_components.size() << "\\n";
-    for (size_t i = 0; i < connected_components.size(); ++i) {
-        std::cout << "Component " << i + 1 << ":\\n";
-        for (const auto& face : connected_components[i]) {
-            std::cout << "  {" << face[0] << ", " << face[1] << ", " << face[2] << "}\\n";
-        }
+std::cout << "Number of connected components: " << connected_components.size() << "\\n";
+for (size_t i = 0; i < connected_components.size(); ++i) {
+    std::cout << "Component " << i + 1 << ":\\n";
+    for (const auto& face : connected_components[i]) {
+        std::cout << "  {" << face[0] << ", " << face[1] << ", " << face[2] << "}\\n";
     }
-
-    return 0;
 }
 ```
 ****
