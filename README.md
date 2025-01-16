@@ -162,20 +162,11 @@ triangles = openstl.convert.triangles(vertices, faces)
 ```python
 import openstl
 
-# Define vertices and faces for two disconnected components
-vertices = [
- [0.0, 0.0, 0.0],
- [1.0, 0.0, 0.0],
- [0.0, 1.0, 0.0],
- [2.0, 2.0, 0.0],
- [3.0, 2.0, 0.0],
- [2.5, 3.0, 0.0],
-]
+# Deserialize triangles from a file
+triangles = openstl.read("disjoint_solids.stl")
 
-faces = [
- [0, 1, 2],  # Component 1
- [3, 4, 5],  # Component 2
-]
+# Convert triangles to vertices and faces
+vertices, faces = openstl.convert.verticesandfaces(triangles)
 
 # Identify connected components of faces
 connected_components = openstl.topology.find_connected_components(vertices, faces)
@@ -295,16 +286,12 @@ const auto& triangles = convertToTriangles(vertices, faces);
 using namespace openstl;
 
 int main() {
-    std::vector<Vec3> vertices = {
-        {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f},  // Component 1
-        {2.0f, 2.0f, 0.0f}, {3.0f, 2.0f, 0.0f}, {2.5f, 3.0f, 0.0f}   // Component 2
-    };
+    // ...
 
-    std::vector<Face> faces = {
-        {0, 1, 2},  // Component 1
-        {3, 4, 5},  // Component 2
-    };
+    // Convert to vertices and faces
+    const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
 
+    // Find connected components
     const auto& connected_components = findConnectedComponents(vertices, faces);
 
     std::cout << "Number of connected components: " << connected_components.size() << "\\n";
