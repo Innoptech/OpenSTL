@@ -174,7 +174,7 @@ connected_components = openstl.topology.find_connected_components(vertices, face
 # Print the result
 print(f"Number of connected components: {len(connected_components)}")
 for i, component in enumerate(connected_components):
- print(f"Component {i + 1}: {component}")
+    print(f"Component {i + 1}: {component}")
 ```
 
 
