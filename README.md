@@ -12,39 +12,6 @@ The fastest and most intuitive library to manipulate STL files (stereolithograph
  🌟 :fist_raised: Please consider starring and sponsoring the GitHub repo to show your support! :fist_raised: 🌟   
 ![GitHub Sponsor](https://img.shields.io/github/sponsors/Innoptech?label=Sponsor&logo=GitHub)
 
-## Index
-1. **Performance**
- - [Performance Benchmark](#performances-benchmark)
-
-2. **Python Usage**
- - [Install](#install)
- - [Read and Write STL Files](#read-and-write-from-a-stl-file)
- - [Rotate, Translate, and Scale Meshes](#rotate-translate-and-scale-a-mesh)
- - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces)
- - [Find Connected Components](#find-connected-components-in-mesh-topology-disjoint-solids)
- - [Use with PyTorch](#use-with-pytorch)
- - [Handling Large STL Files](#read-large-stl-file)
-
-3. **C++ Usage**
- - [Read STL from File](#read-stl-from-file)
- - [Write STL to File](#write-stl-to-a-file)
- - [Serialize STL to Stream](#serialize-stl-to-a-stream)
- - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces-1)
- - [Find Connected Components](#find-connected-components-in-mesh-topology)
-
-4. **C++ Integration**
- - [Smart Method with CMake](#smart-method)
- - [Naïve Method](#naïve-method)
-
-5. **Testing**
- - [Run Tests](#test)
-
-6. **Requirements**
- - [C++ Standards](#requirements)
-
-7. **Disclaimer**
- - [STL File Format Limitations](#disclaimer-stl-file-format)
-
 
 # Performances benchmark
 Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl),
