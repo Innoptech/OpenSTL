@@ -9,39 +9,6 @@ The fastest and most intuitive library to manipulate STL files (stereolithograph
 [![build](https://github.com/Innoptech/OpenSTL/actions/workflows/publish-to-test-pypi.yml/badge.svg?style=flat-square)](https://github.com/Innoptech/OpenSTL/actions/workflows/publish-to-test-pypi.yml)
 [![Python](https://img.shields.io/pypi/pyversions/openstl.svg)](https://pypi.org/project/openstl/)
 
-## Index
-1. **Performance**
- - [Performance Benchmark](#performances-benchmark)
-
-2. **Python Usage**
- - [Install](#install)
- - [Read and Write STL Files](#read-and-write-from-a-stl-file)
- - [Rotate, Translate, and Scale Meshes](#rotate-translate-and-scale-a-mesh)
- - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces)
- - [Find Connected Components](#find-connected-components-in-mesh-topology-disjoint-solids)
- - [Use with PyTorch](#use-with-pytorch)
- - [Handling Large STL Files](#read-large-stl-file)
-
-3. **C++ Usage**
- - [Read STL from File](#read-stl-from-file)
- - [Write STL to File](#write-stl-to-a-file)
- - [Serialize STL to Stream](#serialize-stl-to-a-stream)
- - [Convert Between Triangles and Vertices/Faces](#convert-triangles-arrow_right-vertices-and-faces-1)
- - [Find Connected Components](#find-connected-components-in-mesh-topology)
-
-4. **C++ Integration**
- - [Smart Method with CMake](#smart-method)
- - [Naïve Method](#naïve-method)
-
-5. **Testing**
- - [Run Tests](#test)
-
-6. **Requirements**
- - [C++ Standards](#requirements)
-
-7. **Disclaimer**
- - [STL File Format Limitations](#disclaimer-stl-file-format)
-
 
 # Performances benchmark
 Discover the staggering performance of OpenSTL in comparison to [numpy-stl](https://github.com/wolph/numpy-stl),
@@ -159,20 +126,11 @@ triangles = openstl.convert.triangles(vertices, faces)
 ```python
 import openstl
 
-# Define vertices and faces for two disconnected components
-vertices = [
- [0.0, 0.0, 0.0],
- [1.0, 0.0, 0.0],
- [0.0, 1.0, 0.0],
- [2.0, 2.0, 0.0],
- [3.0, 2.0, 0.0],
- [2.5, 3.0, 0.0],
-]
+# Deserialize triangles from a file
+triangles = openstl.read("disjoint_solids.stl")
 
-faces = [
- [0, 1, 2],  # Component 1
- [3, 4, 5],  # Component 2
-]
+# Convert triangles to vertices and faces
+vertices, faces = openstl.convert.verticesandfaces(triangles)
 
 # Identify connected components of faces
 connected_components = openstl.topology.find_connected_components(vertices, faces)
@@ -180,7 +138,7 @@ connected_components = openstl.topology.find_connected_components(vertices, face
 # Print the result
 print(f"Number of connected components: {len(connected_components)}")
 for i, component in enumerate(connected_components):
- print(f"Component {i + 1}: {component}")
+    print(f"Faces of component {i + 1}: {component}")
 ```
 
 
@@ -285,34 +243,20 @@ const auto& triangles = convertToTriangles(vertices, faces);
 
 ### Find Connected Components in Mesh Topology
 ```c++
-#include <openstl/topology.hpp>
-#include <vector>
-#include <iostream>
-
 using namespace openstl;
 
-int main() {
-    std::vector<Vec3> vertices = {
-        {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f},  // Component 1
-        {2.0f, 2.0f, 0.0f}, {3.0f, 2.0f, 0.0f}, {2.5f, 3.0f, 0.0f}   // Component 2
-    };
+// Convert to vertices and faces
+const auto& [vertices, faces] = convertToVerticesAndFaces(triangles);
 
-    std::vector<Face> faces = {
-        {0, 1, 2},  // Component 1
-        {3, 4, 5},  // Component 2
-    };
+// Find connected components
+const auto& connected_components = findConnectedComponents(vertices, faces);
 
-    const auto& connected_components = findConnectedComponents(vertices, faces);
-
-    std::cout << "Number of connected components: " << connected_components.size() << "\\n";
-    for (size_t i = 0; i < connected_components.size(); ++i) {
-        std::cout << "Component " << i + 1 << ":\\n";
-        for (const auto& face : connected_components[i]) {
-            std::cout << "  {" << face[0] << ", " << face[1] << ", " << face[2] << "}\\n";
-        }
+std::cout << "Number of connected components: " << connected_components.size() << "\\n";
+for (size_t i = 0; i < connected_components.size(); ++i) {
+    std::cout << "Component " << i + 1 << ":\\n";
+    for (const auto& face : connected_components[i]) {
+        std::cout << "  {" << face[0] << ", " << face[1] << ", " << face[2] << "}\\n";
     }
-
-    return 0;
 }
 ```
 ****
