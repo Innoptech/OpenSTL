@@ -25,15 +25,22 @@ SOFTWARE.
 #ifndef OPENSTL_OPENSTL_SERIALIZE_H
 #define OPENSTL_OPENSTL_SERIALIZE_H
 #include <fstream>
-#include <sstream>
 #include <iostream>
-#include <vector>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <iterator>
 #include <unordered_map>
 #include <tuple>
 #include <cmath>
 #include <algorithm>
 #include <array>
+#include <cctype>
+#include <cstdint>
+#include <limits>
+#include <locale>
+#include <stdexcept>
+#include <vector>
 
 #define MAX_TRIANGLES 1000000
 
@@ -139,56 +146,153 @@ namespace openstl
     }
 
     /**
-     * @brief Read a vertex from a stream.
+     * @brief Trim leading whitespace from a string_view.
      *
-     * @tparam Stream The type of the input stream.
-     * @param stream The input stream from which to read the vertex.
-     * @param vertex The Vec3 object to store the read vertex.
+     * @param sv Input string view.
+     * @return A string_view with leading whitespace removed.
+     */
+    inline std::string_view ltrim(std::string_view sv) noexcept {
+        size_t i{0};
+        while (i < sv.size() && std::isspace(static_cast<unsigned char>(sv[i]))) ++i;
+        return sv.substr(i);
+    }
+
+    /**
+     * @brief Case-insensitive prefix match.
+     *
+     * @param hay Line to inspect.
+     * @param needle Expected prefix.
+     * @return True if hay starts with needle (ignoring case).
+     */
+    inline bool istarts_with(std::string_view hay, std::string_view needle) noexcept {
+        if (hay.size() < needle.size()) return false;
+        for (size_t i = 0; i < needle.size(); ++i) {
+            const auto a = std::tolower(static_cast<unsigned char>(hay[i]));
+            const auto b = std::tolower(static_cast<unsigned char>(needle[i]));
+            if (a != b) return false;
+        }
+        return true;
+    }
+
+    /**
+     * @brief Read a line or throw if the stream ends unexpectedly.
+     *
+     * @tparam Stream Input stream type.
+     * @param s Stream to read from.
+     * @param context Context string for error reporting.
+     * @return The read line (without newline).
+     *
+     * @throws std::runtime_error If EOF is reached unexpectedly.
      */
     template <typename Stream>
-    inline void readVertex(Stream& stream, Vec3& vertex)
+    inline std::string getline_or_throw(Stream& s, const char* context) {
+        std::string out{};
+        if (!std::getline(s, out)) {
+            throw std::runtime_error(std::string("Unexpected end of stream while reading ") + context);
+        }
+        return out;
+    }
+
+    /**
+     * @brief Parse three floats from a line after a given ASCII STL keyword.
+     *
+     * Accepts scientific notation; uses C locale for numeric parsing.
+     *
+     * @param line Input line (whitespace tolerated).
+     * @param keyword Expected leading keyword ("facet normal" or "vertex").
+     * @param a Output float #1.
+     * @param b Output float #2.
+     * @param c Output float #3.
+     *
+     * @throws std::runtime_error On keyword mismatch or parsing failure.
+     */
+    inline void parse_three_floats_after(std::string_view line,
+                                         std::string_view keyword,
+                                         float& a, float& b, float& c)
     {
-        std::string line;
-        std::getline(stream, line);
-        if (line.find("vertex") != std::string::npos) {
-            std::istringstream iss(line);
-            iss.ignore(7); // Ignore "vertex "
-            iss >> vertex.x >> vertex.y >> vertex.z;
+        line = ltrim(line);
+        if (!istarts_with(line, keyword)) {
+            throw std::runtime_error("Expected keyword '" + std::string(keyword) + "' not found.");
+        }
+        std::string_view rest = ltrim(line.substr(keyword.size()));
+
+        // Use classic C locale to ensure '.' and scientific notation work regardless of global locale.
+        std::istringstream iss{std::string(rest)};
+        iss.imbue(std::locale::classic());
+        if (!(iss >> a >> b >> c)) {
+            throw std::runtime_error("Failed to parse three floats after '" + std::string(keyword) + "'.");
         }
     }
 
     /**
-     * @brief Deserialize an ASCII STL file from a stream and convert it to a vector of triangles.
+     * @brief Read one vertex from an ASCII STL vertex line.
      *
-     * @tparam Stream The type of the input stream.
-     * @param stream The input stream from which to read the ASCII STL data.
-     * @return A vector of triangles representing the geometry from the ASCII STL file.
+     * Expected syntax: "vertex x y z"
+     *
+     * @tparam Stream Input stream type.
+     * @param stream Stream positioned at a vertex line.
+     * @param v Output vertex coordinates.
+     *
+     * @throws std::runtime_error On malformed or missing vertex line.
      */
     template <typename Stream>
-    inline std::vector<Triangle> deserializeAsciiStl(Stream& stream)
-    {
-        std::vector<Triangle> triangles;
-        std::string line;
-        while (std::getline(stream, line)) {
-            if (line.find("facet normal") != std::string::npos) {
-                Triangle tri{};
-                {
-                    std::istringstream iss(line);
-                    iss.ignore(13); // Ignore "facet normal "
-                    iss >> tri.normal.x >> tri.normal.y >> tri.normal.z;
-                }
+    inline void readVertex(Stream& stream, Vec3& v) {
+        const std::string line = getline_or_throw(stream, "vertex line");
+        parse_three_floats_after(std::string_view(line), "vertex", v.x, v.y, v.z);
+    }
 
-                std::getline(stream, line); // Skip 'outer loop' line
-                readVertex(stream, tri.v0);
-                readVertex(stream, tri.v1);
-                readVertex(stream, tri.v2);
-                triangles.push_back(tri);
+    /**
+     * @brief Deserialize triangles from an ASCII STL input stream.
+     *
+     * Supports scientific notation and variable whitespace.
+     * Ignores unrelated lines (endfacet/endsolid/comments).
+     *
+     * @tparam Stream Input stream type.
+     * @param stream Stream containing ASCII STL data.
+     * @param max_triangles Optional safety bound (default: unlimited).
+     *
+     * @return Vector of parsed triangles.
+     *
+     * @throws std::runtime_error On malformed geometry or size overflow.
+     */
+    template <typename Stream>
+    inline std::vector<Triangle> deserializeAsciiStl(
+            Stream& stream,
+            std::size_t max_triangles = std::numeric_limits<std::size_t>::max())
+    {
+        std::vector<Triangle> tris;
+        std::string raw;
+
+        while (std::getline(stream, raw)) {
+            std::string_view line = ltrim(std::string_view(raw));
+
+            if (!istarts_with(line, "facet normal")) {
+                // Tolerate other lines (solid/endsolid/endfacet/endloop/comments).
+                continue;
             }
-            if (activateOverflowSafety() && triangles.size() > MAX_TRIANGLES) {
+
+            Triangle t{};
+            parse_three_floats_after(line, "facet normal", t.normal.x, t.normal.y, t.normal.z);
+
+            // Read and optionally validate the 'outer loop' line.
+            const std::string outer = getline_or_throw(stream, "'outer loop'");
+            // If you want strictness, uncomment:
+            // if (!istarts_with(ltrim(std::string_view(outer)), "outer loop")) {
+            //     throw std::runtime_error("Expected 'outer loop' after 'facet normal'.");
+            // }
+
+            // Three vertices
+            readVertex(stream, t.v0);
+            readVertex(stream, t.v1);
+            readVertex(stream, t.v2);
+
+            tris.push_back(t);
+            if (tris.size() > max_triangles) {
                 throw std::runtime_error("Triangle count exceeds the maximum allowable value.");
             }
         }
-        return triangles;
+
+        return tris;
     }
 
     /**
