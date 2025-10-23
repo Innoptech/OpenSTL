@@ -1,0 +1,90 @@
+name: CI & Bump
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Default: no privileges; grant per-job
+permissions: {}
+
+# Avoid overlapping runs on the same ref (original push + bump commit)
+concurrency:
+  group: ci-and-bump-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'pull_request'
+    name: Build and Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+    steps:
+      - name: Checkout (read-only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+      - name: Run tests
+        run: |
+          python -m pip install numpy pytest
+          pytest -q
+
+  bump_version_and_tag:
+    # Run only on human pushes to main AND not for bump commits
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !startsWith(github.event.head_commit.message, 'bump:') &&
+      github.actor != 'github-actions[bot]'
+    name: Bump version and tag on main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push commit + tag if fallback to GITHUB_TOKEN, but we use PAT
+    steps:
+      - name: Checkout (PAT; full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: true
+          token: ${{ secrets.GH_PAT }}  # <— PAT so pushes trigger release workflow
+
+      - name: Ensure tags are present & reachable
+        id: tagcheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force --prune
+          echo "Closest tag from HEAD (if any):"
+          (git describe --tags --abbrev=0 --match 'v*' || echo "NONE")
+          echo "Recent v* tags:"
+          git tag --list 'v*' --sort=-creatordate | head -n 10
+
+      - name: Set git identity
+        run: |
+          git config user.name "innoptech-bot"
+          git config user.email "ruelj2@users.noreply.github.com"
+
+      - name: Commitizen bump (no changelog, pushes commit+tag)
+        id: cz
+        uses: commitizen-tools/commitizen-action@0.24.0
+        with:
+          github_token: ${{ secrets.GH_PAT }}  # <— PAT again
+          push: true
+          changelog: false
+
+      - name: Show bumped version
+        run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
