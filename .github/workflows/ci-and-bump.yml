@@ -77,7 +77,7 @@ jobs:
       - name: Commitizen seed bump (no tags yet)
         if: steps.tags.outputs.count == '0'
         id: cz_seed
-        uses: commitizen-tools/commitizen-action@v3
+        uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           push: true
