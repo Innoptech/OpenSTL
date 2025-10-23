@@ -1,0 +1,55 @@
+name: CI & Bump
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: write  # allow pushing commits/tags from this workflow
+
+jobs:
+  build:
+    if: github.event_name == 'pull_request'
+    name: Build and Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+      - name: Run tests
+        run: |
+          python -m pip install numpy pytest
+          pytest -q
+
+  bump_version_and_tag:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'bump:')
+    name: Bump version and tag on main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (HTTPS with token)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true  # keep token in origin for push
+      - name: Set git identity
+        run: |
+          git config user.name "innoptech-bot"
+          git config user.email "ruelj2@users.noreply.github.com"
+      - name: Commitizen bump
+        id: cz
+        uses: commitizen-tools/commitizen-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          push: true  # let the action push commit + tag
+      - name: Show bumped version
+        run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
