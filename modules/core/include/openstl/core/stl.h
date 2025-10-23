@@ -404,7 +404,7 @@ namespace openstl
     };
 
     /**
-     * @brief  Find the inverse map: vertex -> face idx
+     * @brief  Find the inverse map: vertex to face idx
      * @param triangles The container of triangles from which to find unique vertices
      * @return A hash map that maps: for each unique vertex -> a vector of corresponding face indices
      */
