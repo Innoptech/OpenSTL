@@ -6,20 +6,31 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write  # allow pushing commits/tags from this workflow
+# Default: no privileges; grant per-job
+permissions: {}
+
+# Avoid overlapping runs on the same ref (original push + bump commit)
+concurrency:
+  group: ci-and-bump-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     if: github.event_name == 'pull_request'
     name: Build and Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-14]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout (read-only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
       - name: Install package
@@ -32,24 +43,67 @@ jobs:
           pytest -q
 
   bump_version_and_tag:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'bump:')
+    # Run only on human pushes to main AND not for bump commits
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !startsWith(github.event.head_commit.message, 'bump:') &&
+      github.actor != 'github-actions[bot]'
     name: Bump version and tag on main
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push commit + tag
     steps:
-      - name: Checkout (HTTPS with token)
+      - name: Checkout (token; full history + tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: true  # keep token in origin for push
+          fetch-tags: true
+          persist-credentials: true
+
+      - name: Ensure tags are present & reachable
+        id: tagcheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force --prune
+          # Count only tags that are on the current history line
+          MERGED_COUNT=$(git tag --list 'v*' --merged HEAD | wc -l | tr -d '[:space:]')
+          echo "merged_count=$MERGED_COUNT" >> "$GITHUB_OUTPUT"
+          echo "Closest tag from HEAD (if any):"
+          (git describe --tags --abbrev=0 --match 'v*' || echo "NONE")
+          echo "Recent v* tags:"
+          git tag --list 'v*' --sort=-creatordate | head -n 10
+
       - name: Set git identity
         run: |
           git config user.name "innoptech-bot"
           git config user.email "ruelj2@users.noreply.github.com"
-      - name: Commitizen bump
-        id: cz
-        uses: commitizen-tools/commitizen-action@master
+
+      # ---- First-run seeding: if no reachable tag on this history, create one patch tag without changelog
+      - name: Commitizen seed bump (no reachable tag)
+        if: steps.tagcheck.outputs.merged_count == '0'
+        id: cz_seed
+        uses: commitizen-tools/commitizen-action@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          push: true  # let the action push commit + tag
+          push: true
+          increment: patch
+          changelog: false
+
+      # ---- Normal path: previous tag exists → standard bump with changelog
+      - name: Commitizen bump
+        if: steps.tagcheck.outputs.merged_count != '0'
+        id: cz
+        uses: commitizen-tools/commitizen-action@0.24.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          push: true
+
       - name: Show bumped version
+        if: steps.tagcheck.outputs.merged_count != '0'
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
+
+      - name: Show seeded version
+        if: steps.tagcheck.outputs.merged_count == '0'
+        run: echo "Seeded first tag at version ${{ steps.cz_seed.outputs.version }}"
