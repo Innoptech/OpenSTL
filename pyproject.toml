@@ -26,7 +26,7 @@ testpaths = ["tests/python"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "3.0.2"
+version = "3.0.3"
 tag_format = "v$version"
 update_changelog_on_bump = false
 changelog_incremental = false
