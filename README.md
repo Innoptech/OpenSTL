@@ -296,6 +296,6 @@ The STL format is simple and widely used, but that simplicity brings important l
 
 - No validation: STL files include no checksums, hashes, or structure verification, so corruption (e.g., truncated or malformed data) often goes undetected until parsing.
 - Sensitive to corruption: Errors during download, storage, or editing may only fail at runtime, causing crashes or undefined behavior.
-- Security concerns: Without built-in bounds checks, malformed STL files can potentially trigger buffer overflows—especially risky when handling untrusted input.
+- Security concerns: Without built-in bounds checks, malformed STL files can potentially trigger buffer overflows, especially risky when handling untrusted input.
 
 Because STL offers no internal protection, applications must implement their own validation and error-handling when loading these files.
