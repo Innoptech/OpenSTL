@@ -80,18 +80,6 @@ jobs:
           git config user.name "innoptech-bot"
           git config user.email "ruelj2@users.noreply.github.com"
 
-      # ---- First-run seeding: if no reachable tag on this history, create one patch tag without changelog
-      - name: Commitizen seed bump (no reachable tag)
-        if: steps.tagcheck.outputs.merged_count == '0'
-        id: cz_seed
-        uses: commitizen-tools/commitizen-action@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          push: true
-          increment: patch
-          changelog: false
-
-      # ---- Normal path: previous tag exists → standard bump with changelog
       - name: Commitizen bump
         if: steps.tagcheck.outputs.merged_count != '0'
         id: cz
