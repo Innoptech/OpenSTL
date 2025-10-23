@@ -7,74 +7,191 @@
 
 using namespace openstl;
 
-TEST_CASE("Deserialize ASCII STL", "[openstl]") {
-    SECTION("Single triangle")
-    {
-        std::stringstream stream;
-        stream << "solid name\n";
-        stream << "facet normal 0.1 0.2 1.0\n";
-        stream << "outer loop\n";
-        stream << "vertex 0.0 0.0 0.0\n";
-        stream << "vertex 1.0 0.0 0.0\n";
-        stream << "vertex 0.0 1.0 0.0\n";
-        stream << "endloop\n";
-        stream << "endfacet\n";
-        stream << "endsolid name\n";
 
-        auto triangles = deserializeAsciiStl(stream);
+static std::string oneTriangleBlock(
+        const std::string& normal, const std::string& v0, const std::string& v1, const std::string& v2,
+        const std::string& outer="outer loop")
+{
+    std::ostringstream ss;
+    ss << "facet normal " << normal << "\n";
+    ss << outer << "\n";
+    ss << "vertex " << v0 << "\n";
+    ss << "vertex " << v1 << "\n";
+    ss << "vertex " << v2 << "\n";
+    ss << "endloop\n";
+    ss << "endfacet\n";
+    return ss.str();
+}
 
-        REQUIRE(triangles.size() == 1);
-        REQUIRE(triangles[0].normal.x == 0.1f);
-        REQUIRE(triangles[0].normal.y == 0.2f);
-        REQUIRE(triangles[0].normal.z == 1.0f);
+TEST_CASE("Deserialize ASCII STL: single triangle", "[openstl][ascii]") {
+    const std::string stl_text =
+            "solid name\n"
+            "facet normal 0.1 0.2 1.0\n"
+            "outer loop\n"
+            "vertex 0.0 0.0 0.0\n"
+            "vertex 1.0 0.0 0.0\n"
+            "vertex 0.0 1.0 0.0\n"
+            "endloop\n"
+            "endfacet\n"
+            "endsolid name\n";
 
-        REQUIRE(triangles[0].v0.x == 0.0f);
-        REQUIRE(triangles[0].v0.y == 0.0f);
-        REQUIRE(triangles[0].v0.z == 0.0f);
+    std::stringstream ss1(stl_text);
+    auto triangles = deserializeAsciiStl(ss1);
 
-        REQUIRE(triangles[0].v1.x == 1.0f);
-        REQUIRE(triangles[0].v1.y == 0.0f);
-        REQUIRE(triangles[0].v1.z == 0.0f);
+    REQUIRE(triangles.size() == 1);
+    REQUIRE(triangles[0].normal.x == 0.1f);
+    REQUIRE(triangles[0].normal.y == 0.2f);
+    REQUIRE(triangles[0].normal.z == 1.0f);
 
-        REQUIRE(triangles[0].v2.x == 0.0f);
-        REQUIRE(triangles[0].v2.y == 1.0f);
-        REQUIRE(triangles[0].v2.z == 0.0f);
+    REQUIRE(triangles[0].v0.x == 0.0f);
+    REQUIRE(triangles[0].v0.y == 0.0f);
+    REQUIRE(triangles[0].v0.z == 0.0f);
 
-        stream.clear(); stream.seekg(0);
-        auto triangles_auto = deserializeStl(stream);
-        REQUIRE(triangles.size() == triangles_auto.size());
-    }
-    SECTION("Multiple triangles")
-    {
-        std::stringstream stream;
-        stream << "solid name\n";
-        stream << "facet normal 0.1 0.2 1.0\n";
-        stream << "outer loop\n";
-        stream << "vertex 0.0 0.0 0.0\n";
-        stream << "vertex 1.0 0.0 0.0\n";
-        stream << "vertex 0.0 1.0 0.0\n";
-        stream << "endloop\n";
-        stream << "endfacet\n";
-        stream << "facet normal 0.0 0.0 1.0\n";
-        stream << "outer loop\n";
-        stream << "vertex 0.0 0.0 0.0\n";
-        stream << "vertex 0.0 1.0 0.0\n";
-        stream << "vertex 1.0 0.0 0.0\n";
-        stream << "endloop\n";
-        stream << "endfacet\n";
-        stream << "endsolid name\n";
+    REQUIRE(triangles[0].v1.x == 1.0f);
+    REQUIRE(triangles[0].v1.y == 0.0f);
+    REQUIRE(triangles[0].v1.z == 0.0f);
 
-        auto triangles = deserializeAsciiStl(stream);
+    REQUIRE(triangles[0].v2.x == 0.0f);
+    REQUIRE(triangles[0].v2.y == 1.0f);
+    REQUIRE(triangles[0].v2.z == 0.0f);
 
-        REQUIRE(triangles.size() == 2);
-        REQUIRE(triangles[0].normal.x == 0.1f);
-        REQUIRE(triangles[0].normal.y == 0.2f);
-        REQUIRE(triangles[0].normal.z == 1.0f);
+    std::stringstream ss2(stl_text);
+    auto triangles_auto = deserializeStl(ss2);
+    REQUIRE(triangles.size() == triangles_auto.size());
+}
 
-        stream.clear(); stream.seekg(0);
-        auto triangles_auto = deserializeStl(stream);
-        REQUIRE(triangles.size() == triangles_auto.size());
-    }
+TEST_CASE("Deserialize ASCII STL: multiple triangles", "[openstl][ascii]") {
+    const std::string stl_text =
+            "solid name\n"
+            "facet normal 0.1 0.2 1.0\n"
+            "outer loop\n"
+            "vertex 0.0 0.0 0.0\n"
+            "vertex 1.0 0.0 0.0\n"
+            "vertex 0.0 1.0 0.0\n"
+            "endloop\n"
+            "endfacet\n"
+            "facet normal 0.0 0.0 1.0\n"
+            "outer loop\n"
+            "vertex 0.0 0.0 0.0\n"
+            "vertex 0.0 1.0 0.0\n"
+            "vertex 1.0 0.0 0.0\n"
+            "endloop\n"
+            "endfacet\n"
+            "endsolid name\n";
+
+    std::stringstream ss1(stl_text);
+    auto triangles = deserializeAsciiStl(ss1);
+
+    REQUIRE(triangles.size() == 2);
+    REQUIRE(triangles[0].normal.x == 0.1f);
+    REQUIRE(triangles[0].normal.y == 0.2f);
+    REQUIRE(triangles[0].normal.z == 1.0f);
+
+    std::stringstream ss2(stl_text);
+    auto triangles_auto = deserializeStl(ss2);
+    REQUIRE(triangles.size() == triangles_auto.size());
+}
+
+TEST_CASE("Deserialize ASCII STL: scientific notation parses (issue #25)", "[openstl][ascii][sci]") {
+    std::stringstream ss;
+    ss << "solid name\n";
+    ss << oneTriangleBlock(
+            "3.530327e-01 -3.218319e-01 -8.785170e-01",
+            "5.502911e-01 -7.287032e-01 3.099700e-01",
+            "2.905658e-01 -3.847714e-01 7.960480e-02",
+            "4.099400e-01 -2.538241e-01 7.960480e-02");
+    ss << "endsolid name\n";
+
+    auto tris = deserializeAsciiStl(ss);
+    REQUIRE(tris.size() == 1);
+    REQUIRE_THAT(tris[0].normal.x, Catch::Matchers::WithinAbs( 3.530327e-01f, 1e-6f));
+    REQUIRE_THAT(tris[0].normal.y, Catch::Matchers::WithinAbs(-3.218319e-01f, 1e-6f));
+    REQUIRE_THAT(tris[0].normal.z, Catch::Matchers::WithinAbs(-8.785170e-01f, 1e-6f));
+    REQUIRE_THAT(tris[0].v0.x,     Catch::Matchers::WithinAbs( 5.502911e-01f, 1e-6f));
+    REQUIRE_THAT(tris[0].v2.z,     Catch::Matchers::WithinAbs( 7.960480e-02f, 1e-6f));
+}
+
+TEST_CASE("Deserialize ASCII STL: keywords are case-insensitive", "[openstl][ascii][case]") {
+    std::stringstream ss;
+    ss << "solid s\n";
+    ss << "FACET NORMAL 1E+00 0E+00 0E+00\n";
+    ss << "OUTER LOOP\n";
+    ss << "VERTEX 0E+00 0E+00 0E+00\n";
+    ss << "VERTEX 1E+00 0E+00 0E+00\n";
+    ss << "VERTEX 0E+00 1E+00 0E+00\n";
+    ss << "ENDLOOP\nENDFACET\nENDSOLID s\n";
+
+    auto tris = deserializeAsciiStl(ss);
+    REQUIRE(tris.size() == 1);
+    REQUIRE_THAT(tris[0].normal.x, Catch::Matchers::WithinAbs(1.0f, 1e-6f));
+}
+
+TEST_CASE("Deserialize ASCII STL: Windows CRLF endings are tolerated", "[openstl][ascii][crlf]") {
+    std::string text;
+    text  = "solid s\r\n";
+    text += oneTriangleBlock("1.0 0.0 0.0", "0 0 0", "1 0 0", "0 1 0");
+    std::replace(text.begin(), text.end(), '\n', '\r'); // make everything CR
+    // Ensure CRLF pairs exist (simulate typical CRLF): we’ll craft quickly:
+    // For simplicity, rebuild with \r\n pairs:
+    text  = "solid s\r\n";
+    text += "facet normal 1.0 0.0 0.0\r\n";
+    text += "outer loop\r\n";
+    text += "vertex 0 0 0\r\n";
+    text += "vertex 1 0 0\r\n";
+    text += "vertex 0 1 0\r\n";
+    text += "endloop\r\nendfacet\r\nendsolid s\r\n";
+
+    std::stringstream ss(text);
+    auto tris = deserializeAsciiStl(ss);
+    REQUIRE(tris.size() == 1);
+    REQUIRE_THAT(tris[0].v1.x, Catch::Matchers::WithinAbs(1.0f, 1e-6f));
+}
+
+TEST_CASE("Deserialize ASCII STL: extra tokens after numbers are ignored", "[openstl][ascii][garbage]") {
+    std::stringstream ss;
+    ss << "solid s\n";
+    ss << "facet normal 0 0 1 extra tokens here\n";
+    ss << "outer loop\n";
+    ss << "vertex 0 0 0 trailing\n";
+    ss << "vertex 1 0 0 garbage\n";
+    ss << "vertex 0 1 0 more_garbage\n";
+    ss << "endloop\nendfacet\nendsolid s\n";
+
+    auto tris = deserializeAsciiStl(ss);
+    REQUIRE(tris.size() == 1);
+    REQUIRE_THAT(tris[0].normal.z, Catch::Matchers::WithinAbs(1.0f, 1e-6f));
+}
+
+TEST_CASE("Deserialize ASCII STL: malformed vertex fails fast (missing coord)", "[openstl][ascii][error]") {
+    std::stringstream ss;
+    ss << "solid s\n";
+    ss << "facet normal 0 0 1\n";
+    ss << "outer loop\n";
+    ss << "vertex 0 0\n";        // <-- missing Z
+    ss << "vertex 1 0 0\n";
+    ss << "vertex 0 1 0\n";
+    ss << "endloop\nendfacet\nendsolid s\n";
+
+    REQUIRE_THROWS_AS(deserializeAsciiStl(ss), std::runtime_error);
+}
+
+TEST_CASE("Deserialize ASCII STL: unexpected EOF fails fast", "[openstl][ascii][eof]") {
+    std::stringstream ss;
+    ss << "solid s\n";
+    ss << "facet normal 0 0 1\n";
+    ss << "outer loop\n";
+    ss << "vertex 0 0 0\n";
+    // stream ends abruptly before vertex 2/3
+    REQUIRE_THROWS_AS(deserializeAsciiStl(ss), std::runtime_error);
+}
+
+TEST_CASE("Deserialize ASCII STL: non-facet text is ignored (0 triangles)", "[openstl][ascii][ignore]") {
+    std::stringstream ss;
+    ss << "solid s\n";
+    ss << "this is a comment\n";
+    ss << "endsolid s\n";
+    auto tris = deserializeAsciiStl(ss);
+    REQUIRE(tris.empty());
 }
 
 TEST_CASE("Deserialize Binary STL", "[openstl]") {
