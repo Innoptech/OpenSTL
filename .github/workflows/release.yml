@@ -3,7 +3,7 @@ name: Build & Publish
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'   # triggered by PAT-backed push from CI & Bump
 
 jobs:
   build_wheels:
@@ -34,63 +34,4 @@ jobs:
   publish-to-testpypi:
     name: Publish to TestPyPI
     needs: build_wheels
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/openstl
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
-  publish-to-pypi:
-    name: Publish to PyPI
-    needs: publish-to-testpypi
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/openstl
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-      - uses: pypa/gh-action-pypi-publish@release/v1
-
-  github-release:
-    name: Sign & Upload to GitHub Release
-    needs: publish-to-pypi
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
-          merge-multiple: true
-      - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v2.1.1
-        with:
-          inputs: ./dist/*.whl
-      - name: Create GitHub Release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release create '${{ github.ref_name }}' --repo '${{ github.repository }}' --notes ""
-      - name: Upload artifacts
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release upload '${{ github.ref_name }}' dist/** --repo '${{ github.repository }}'
+    runs-on: ubuntu-l

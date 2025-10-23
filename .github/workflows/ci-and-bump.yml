@@ -52,14 +52,15 @@ jobs:
     name: Bump version and tag on main
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to push commit + tag
+      contents: write   # needed to push commit + tag if fallback to GITHUB_TOKEN, but we use PAT
     steps:
-      - name: Checkout (token; full history + tags)
+      - name: Checkout (PAT; full history + tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
           persist-credentials: true
+          token: ${{ secrets.GH_PAT }}  # <— PAT so pushes trigger release workflow
 
       - name: Ensure tags are present & reachable
         id: tagcheck
@@ -67,9 +68,6 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --tags --force --prune
-          # Count only tags that are on the current history line
-          MERGED_COUNT=$(git tag --list 'v*' --merged HEAD | wc -l | tr -d '[:space:]')
-          echo "merged_count=$MERGED_COUNT" >> "$GITHUB_OUTPUT"
           echo "Closest tag from HEAD (if any):"
           (git describe --tags --abbrev=0 --match 'v*' || echo "NONE")
           echo "Recent v* tags:"
@@ -80,19 +78,13 @@ jobs:
           git config user.name "innoptech-bot"
           git config user.email "ruelj2@users.noreply.github.com"
 
-      - name: Commitizen bump
-        if: steps.tagcheck.outputs.merged_count != '0'
+      - name: Commitizen bump (no changelog, pushes commit+tag)
         id: cz
         uses: commitizen-tools/commitizen-action@0.24.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GH_PAT }}  # <— PAT again
           push: true
           changelog: false
 
       - name: Show bumped version
-        if: steps.tagcheck.outputs.merged_count != '0'
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
-
-      - name: Show seeded version
-        if: steps.tagcheck.outputs.merged_count == '0'
-        run: echo "Seeded first tag at version ${{ steps.cz_seed.outputs.version }}"
