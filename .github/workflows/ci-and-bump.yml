@@ -9,7 +9,7 @@ on:
 # Default: no privileges; grant per-job
 permissions: {}
 
-# Prevent overlapping runs on main (e.g., original push + bump commit)
+# Prevent overlapping runs on the same ref (e.g., original push + bump commit)
 concurrency:
   group: ci-and-bump-${{ github.ref }}
   cancel-in-progress: false
@@ -52,21 +52,31 @@ jobs:
     permissions:
       contents: write   # needed to push commit + tag
     steps:
-      - name: Checkout (HTTPS with token)
+      - name: Checkout (HTTPS with token; full history + tags)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          fetch-tags: true
           persist-credentials: true  # keep token in origin for push
+
+      - name: Ensure tags are present
+        run: |
+          git fetch --tags --force --prune
+          echo "Tags available:"
+          git tag --list | tail -n 20
+
       - name: Set git identity
         run: |
           git config user.name "innoptech-bot"
           git config user.email "ruelj2@users.noreply.github.com"
+
       - name: Commitizen bump
         id: cz
-        # pin to a stable tag/commit; avoid @master
+        # Pin the action; avoid floating @master
         uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           push: true  # action will push commit + tag
+
       - name: Show bumped version
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
