@@ -28,6 +28,7 @@ testpaths = ["tests/python"]
 name = "cz_conventional_commits"
 version = "2.0.0"
 tag_format = "v$version"
+update_changelog_on_bump = true
 
 [tool.cibuildwheel]
 test-command = "pytest {project}/tests"
