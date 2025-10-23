@@ -64,7 +64,7 @@ jobs:
       - name: Commitizen bump
         id: cz
         # pin to a stable tag/commit; avoid @master
-        uses: commitizen-tools/commitizen-action@v3
+        uses: commitizen-tools/commitizen-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           push: true  # action will push commit + tag
