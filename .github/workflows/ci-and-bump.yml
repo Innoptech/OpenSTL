@@ -6,19 +6,28 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write  # allow pushing commits/tags from this workflow
+# Default: no privileges; grant per-job
+permissions: {}
+
+# Prevent overlapping runs on main (e.g., original push + bump commit)
+concurrency:
+  group: ci-and-bump-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
     if: github.event_name == 'pull_request'
     name: Build and Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-13, macos-14]
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # don't keep token in PR builds
       - uses: actions/setup-python@v5
         with:
           python-version: '3.8'
@@ -32,9 +41,16 @@ jobs:
           pytest -q
 
   bump_version_and_tag:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'bump:')
+    # Run only on human pushes to main AND not for bump commits
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      !startsWith(github.event.head_commit.message, 'bump:') &&
+      github.actor != 'github-actions[bot]'
     name: Bump version and tag on main
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push commit + tag
     steps:
       - name: Checkout (HTTPS with token)
         uses: actions/checkout@v4
@@ -47,9 +63,10 @@ jobs:
           git config user.email "ruelj2@users.noreply.github.com"
       - name: Commitizen bump
         id: cz
-        uses: commitizen-tools/commitizen-action@master
+        # pin to a stable tag/commit; avoid @master
+        uses: commitizen-tools/commitizen-action@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          push: true  # let the action push commit + tag
+          push: true  # action will push commit + tag
       - name: Show bumped version
         run: echo "Bumped to version ${{ steps.cz.outputs.version }}"
