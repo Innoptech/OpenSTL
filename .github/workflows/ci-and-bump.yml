@@ -87,6 +87,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           push: true
+          changelog: false
 
       - name: Show bumped version
         if: steps.tagcheck.outputs.merged_count != '0'
